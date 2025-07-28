@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Events</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header Styles */
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 2.5em;
+            color: #4CAF50;
+        }
+
+        /* Event Container Styles */
+        #events {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Event Card Styles */
+        .event {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        /* Hover effect for event cards */
+        .event:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Event Title */
+        .event h2 {
+            font-size: 1.8em;
+            margin: 0;
+            color: #333;
+        }
+
+        /* Event Date and Location */
+        .event p {
+            font-size: 1.1em;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .event p strong {
+            color: #4CAF50;
+        }
+
+        /* Style for Registration Fee and Category */
+        .event p.registration-fee {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* Category ID Styling */
+        .event p.category {
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        /* Register Button */
+        .register-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            font-size: 1.1em;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .register-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Registration Form Styles */
+        .registration-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .registration-form input, .registration-form select, .registration-form button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* For mobile responsiveness */
+        @media (max-width: 768px) {
+            #events {
+                padding: 15px;
+            }
+
+            .event {
+                padding: 15px;
+            }
+
+            .event h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Upcoming Events</h1>
+    <div id="events"></div>
+
+    <script>
+        // Fetch events from the backend
+        fetch('/events')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const eventsContainer = document.getElementById('events');
+                data.forEach(event => {
+                    const div = document.createElement('div');
+                    div.classList.add('event');
+                    div.setAttribute('data-event-id', event.EventID);  // Add the unique event ID for each card
+                    div.innerHTML = `
+                        <h2>${event.EventName}</h2>
+                        <p><strong>Date:</strong> ${event.EventDate}</p>
+                        <p><strong>Description:</strong> ${event.EventDescription}</p>
+                        <p class="registration-fee"><strong>Registration Fee:</strong> $${event.RegistrationFee}</p>
+                        <p class="category"><strong>Category ID:</strong> ${event.CategoryID}</p>
+                        <button class="register-btn" onclick="showRegistrationForm(${event.EventID})">Register</button>
+                        <div class="registration-form" id="form-${event.EventID}" style="display:none;">
+                            <h2>Register for ${event.EventName}</h2>
+                            <form id="registerForm-${event.EventID}">
+                                <label for="teamId">Team ID (Optional)</label>
+                                <input type="number" id="teamId" name="teamId">
+
+                                <label for="participantId">Participant ID</label>
+                                <input type="number" id="participantId" name="participantId" required>
+
+                                <label for="paymentStatus">Payment Status</label>
+                                <select id="paymentStatus" name="paymentStatus" required>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Paid">Paid</option>
+                                </select>
+
+                                <button type="submit">Submit Registration</button>
+                            </form>
+                        </div>
+                    `;
+                    eventsContainer.appendChild(div);
+                });
+            })
+            .catch(err => {
+                console.error('Failed to load events:', err);
+                const eventsContainer = document.getElementById('events');
+                eventsContainer.innerHTML = '<p>Failed to load events. Please try again later.</p>';
+            });
+
+        // Show registration form beneath the selected event
+        function showRegistrationForm(eventId) {
+            const form = document.getElementById(`form-${eventId}`);
+            if (form) {
+                form.style.display = 'block';  // Show the registration form
+            }
+        }
+
+        // Handle form submission
+        function handleFormSubmit(eventId, form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const teamId = document.getElementById('teamId').value;
+                const participantId = document.getElementById('participantId').value;
+                const paymentStatus = document.getElementById('paymentStatus').value;
+
+                // Send registration data to backend
+                fetch('/event-register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        EventID: eventId,
+                        TeamID: teamId || null,  // TeamID is optional
+                        ParticipantID: participantId,
+                        PaymentStatus: paymentStatus
+                    })
+                })
+                .then(response => response.text())
+                .then(message => {
+                    alert(message);  // Alert success or failure
+                    form.style.display = 'none';  // Hide form after submission
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Registration failed. Please try again.');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

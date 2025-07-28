@@ -1,0 +1,108 @@
+<!-- public/register.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register - NASCON</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            width: 300px;
+            text-align: center;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            text-decoration: none;
+            color: #4CAF50;
+        }
+
+        p {
+            margin-top: 15px;
+        }
+
+        .error-message {
+            color: #D8000C;
+            background-color: #FFD2D2;
+            border: 1px solid #D8000C;
+            padding: 10px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Register</h1>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form action="/register" method="POST">
+            <input type="text" name="username" placeholder="Username" required><br>
+
+            <input type="email" name="email" placeholder="Email" required><br>
+
+            <input type="text" name="phone" placeholder="Phone Number"><br>
+
+            <input type="text" name="university" placeholder="University"><br>
+
+            <input type="password" name="password" placeholder="Password" required><br>
+
+          
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Login Here</a></p>
+        <!-- Added script to check for URL error parameter -->
+    <script>
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error'); // Get the value of 'error' parameter
+
+            if (error) {
+                const errorMessageDiv = document.getElementById('errorMessage');
+                // Decode the error message
+                errorMessageDiv.textContent = decodeURIComponent(error);
+                errorMessageDiv.style.display = 'block'; // Make the error div visible
+            }
+        };
+    </script>
+    </div>
+</body>
+</html>

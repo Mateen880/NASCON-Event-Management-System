@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Sponsorship Contracts - NaSCon</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f7f9fc;
+        }
+
+        /* Navbar */
+        nav {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #18bc9c;
+        }
+
+        /* Main Content */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        .subheading {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+
+        /* Contract Cards */
+        .contracts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .contract-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .contract-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .contract-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .contract-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .contract-status, .payment-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-signed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-pending {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .status-expired {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-paid {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-overdue {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .contract-details {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #616161;
+            width: 150px;
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .contract-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .payment-confirmation {
+            display: flex;
+            align-items: center;
+            color: #2e7d32;
+            font-weight: 500;
+            gap: 8px;
+        }
+
+        .payment-confirmation-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #2e7d32;
+            color: white;
+            border-radius: 50%;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #18bc9c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #159a80;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        /* Payment Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-method:hover {
+            border-color: #18bc9c;
+        }
+
+        .payment-method.selected {
+            border-color: #18bc9c;
+            background-color: #f0fdf9;
+        }
+
+        .payment-method-radio {
+            margin-right: 1rem;
+        }
+
+        .payment-method-details {
+            flex-grow: 1;
+        }
+
+        .payment-method-title {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .payment-method-description {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .empty-state p {
+            color: #7f8c8d;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Alert messages */
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">NaSCon</div>
+        <ul>
+            <li><a href="/homepage.html">Home</a></li>
+            <li><a href="/sponsor_contracts.html">My Contracts</a></li>
+            <li><a href="/user_profile.html">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>My Sponsorship Contracts</h1>
+        <p class="subheading">Manage your sponsorship agreements and payments for NaSCon</p>
+        
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success hidden"></div>
+        <div id="alertError" class="alert alert-danger hidden"></div>
+        
+        <!-- Contracts Grid -->
+        <div id="contractsGrid" class="contracts-grid">
+            <div class="loading">Loading your contracts...</div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Complete Payment</h2>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            
+            <div class="payment-details">
+                <p>Please select a payment method to complete your sponsorship payment:</p>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" data-method="Credit Card">
+                        <input type="radio" name="paymentMethod" id="creditCard" class="payment-method-radio">
+                        <div class="payment-method-details">
+                            <div class="payment-method-title">Credit/Debit Card</div>
+                            <div class="payment-method-description">Pay securely with your card</div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-method" data-method="Bank Transfer">
+                        <input type="radio" name="paymentMethod" id="bankTransfer" class="payment-method-radio">
+                        <div class="payment-method-details">
+                            <div class="payment-method-title">Bank Transfer</div>
+                            <div class="payment-method-description">Transfer from your bank account</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="currentContractId">
+                <input type="hidden" id="currentAmount">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="cancelPayment">Cancel</button>
+                <button class="btn btn-primary" id="confirmPayment">Complete Payment</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const contractsGrid = document.getElementById('contractsGrid');
+        const alertSuccess = document.getElementById('alertSuccess');
+        const alertError = document.getElementById('alertError');
+        const paymentModal = document.getElementById('paymentModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelPayment = document.getElementById('cancelPayment');
+        const confirmPayment = document.getElementById('confirmPayment');
+        const currentContractId = document.getElementById('currentContractId');
+        const currentAmount = document.getElementById('currentAmount');
+        const paymentMethods = document.querySelectorAll('.payment-method');
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserRole();
+            fetchContracts();
+        });
+        closeModal.addEventListener('click', hidePaymentModal);
+        cancelPayment.addEventListener('click', hidePaymentModal);
+        confirmPayment.addEventListener('click', processPayment);
+
+        // Set up payment method selection
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', function() {
+                // Clear previous selection
+                paymentMethods.forEach(m => {
+                    m.classList.remove('selected');
+                    m.querySelector('input').checked = false;
+                });
+                
+                // Set new selection
+                this.classList.add('selected');
+                this.querySelector('input').checked = true;
+            });
+        });
+
+        // Fetch sponsor contracts
+        function fetchContracts() {
+            fetch('/api/sponsor/contracts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch contracts');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    renderContracts(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching contracts:', error);
+                    contractsGrid.innerHTML = '<div class="empty-state"><p>Failed to load contracts. Please try again later.</p></div>';
+                });
+        }
+
+        // Render contracts to the grid
+        function renderContracts(contracts) {
+            // Hide any previous alerts
+            alertSuccess.classList.add('hidden');
+            alertError.classList.add('hidden');
+            
+            if (!contracts || contracts.length === 0) {
+                contractsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <p>You don't have any sponsorship contracts yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            contracts.forEach(contract => {
+                const packageCost = parseFloat(contract.PackageCost).toLocaleString();
+                const contractStatusClass = `status-${contract.ContractStatus.toLowerCase()}`;
+                const paymentStatusClass = `status-${contract.PaymentStatus.toLowerCase()}`;
+                
+                html += `
+                    <div class="contract-card">
+                        <div class="contract-header">
+                            <div class="contract-title">${contract.PackageName}</div>
+                            <div class="contract-status ${contractStatusClass}">${contract.ContractStatus}</div>
+                        </div>
+                        <div class="contract-details">
+                            <div class="detail-row">
+                                <div class="detail-label">Contract Date:</div>
+                                <div class="detail-value">${new Date(contract.ContractDate).toLocaleDateString()}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Package:</div>
+                                <div class="detail-value">${contract.PackageName}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Amount:</div>
+                                <div class="detail-value">Rs. ${packageCost}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Payment Status:</div>
+                                <div class="detail-value">
+                                    <span class="payment-status ${paymentStatusClass}">${contract.PaymentStatus}</span>
+                                </div>
+                            </div>
+                        </div>
+                `;
+                
+                // Only show payment button for pending payments
+                if (contract.PaymentStatus === 'Pending') {
+                    html += `
+                        <div class="contract-actions">
+                            <button class="btn btn-primary" onclick="showPaymentModal(${contract.ContractID}, ${contract.PackageCost})">Make Payment</button>
+                        </div>
+                    `;
+                } else if (contract.PaymentStatus === 'Paid') {
+                    html += `
+                        <div class="contract-actions">
+                            <div class="payment-confirmation">
+                                <span class="payment-confirmation-icon">✓</span>
+                                Payment complete - Thank you for your sponsorship!
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`;
+            });
+
+            contractsGrid.innerHTML = html;
+        }
+
+        // Show payment modal
+        function showPaymentModal(contractId, amount) {
+            currentContractId.value = contractId;
+            currentAmount.value = amount;
+            
+            // Reset payment method selection
+            paymentMethods.forEach(m => {
+                m.classList.remove('selected');
+                m.querySelector('input').checked = false;
+            });
+            
+            paymentModal.classList.add('active');
+        }
+
+        // Hide payment modal
+        function hidePaymentModal() {
+            paymentModal.classList.remove('active');
+        }
+
+        // Process payment
+        function processPayment() {
+            // Get selected payment method
+            const selectedMethod = document.querySelector('.payment-method.selected');
+            if (!selectedMethod) {
+                showError('Please select a payment method');
+                return;
+            }
+            
+            const paymentMethod = selectedMethod.dataset.method;
+            const contractId = currentContractId.value;
+            const amount = currentAmount.value;
+            
+            // Make the payment request
+            fetch(`/api/sponsor/contracts/${contractId}/pay`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    paymentMethod: paymentMethod,
+                    amount: amount
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to process payment');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Hide modal
+                hidePaymentModal();
+                
+                // Show success message
+                showSuccess(data.message || 'Payment processed successfully');
+                
+                // Refresh contracts
+                fetchContracts();
+            })
+            .catch(error => {
+                console.error('Error processing payment:', error);
+                showError(error.message || 'Failed to process payment');
+            });
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            alertSuccess.textContent = message;
+            alertSuccess.classList.remove('hidden');
+            alertSuccess.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Show error message
+        function showError(message) {
+            alertError.textContent = message;
+            alertError.classList.remove('hidden');
+            alertError.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Check if user has the correct role to access this page
+        function checkUserRole() {
+            fetch('/getRole')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user role');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.role !== 'Sponsor' && data.role !== 'Admin') {
+                        // Redirect to homepage if not a sponsor or admin
+                        window.location.href = '/homepage.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching user role:', error);
+                    window.location.href = '/homepage.html';
+                });
+        }
+    </script>
+</body>
+</html> 

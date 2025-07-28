@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Role Requests - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin_requests.html">Role Requests</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">Role Requests Management</h2>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>User</th>
+                        <th>Requested Role</th>
+                        <th>Details</th>
+                        <th>Status</th>
+                        <th>Request Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                    <!-- Requests will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadRoleRequests() {
+            try {
+                const response = await fetch('/api/admin/role-requests');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch role requests');
+                }
+                const requests = await response.json();
+                const tbody = document.getElementById('requestsTableBody');
+                tbody.innerHTML = '';
+
+                requests.forEach(request => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${request.RequestID}</td>
+                        <td>${request.UserName} (${request.Email})</td>
+                        <td>${request.RequestedRole}</td>
+                        <td>${request.Details}</td>
+                        <td>${request.Status}</td>
+                        <td>${new Date(request.RequestTimestamp).toLocaleString()}</td>
+                        <td>
+                            ${request.Status === 'Pending' ? `
+                                <button class="btn btn-success btn-sm" onclick="handleRequest(${request.RequestID}, 'approve')">Approve</button>
+                                <button class="btn btn-danger btn-sm" onclick="handleRequest(${request.RequestID}, 'reject')">Reject</button>
+                            ` : 'No actions available'}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load role requests');
+            }
+        }
+
+        async function handleRequest(requestId, action) {
+            try {
+                const response = await fetch(`/api/admin/role-requests/${requestId}/${action}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert(`Request ${action}d successfully!`);
+                    loadRoleRequests(); // Refresh the table
+                } else {
+                    const error = await response.json();
+                    alert(error.message || `Failed to ${action} request`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`An error occurred while processing the request`);
+            }
+        }
+
+        // Load requests when page loads
+        document.addEventListener('DOMContentLoaded', loadRoleRequests);
+    </script>
+</body>
+</html> 

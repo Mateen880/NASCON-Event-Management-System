@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NaSCon Home</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f7f9fc;
+        }
+
+        /* Navbar */
+        nav {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #18bc9c;
+        }
+
+        /* Hero Section */
+        header {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1581091226825-4c4a6ba00c57?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') center/cover;
+            color: white;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 2s ease-in;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* About Section */
+        .about, .stats, .sponsors {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .about h2, .stats h2, .sponsors h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .about p, .sponsors p {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            color: #555;
+        }
+
+        /* Stats Section */
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 200px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat h3 {
+            font-size: 2rem;
+            color: #18bc9c;
+        }
+
+        .stat p {
+            margin-top: 0.5rem;
+            color: #777;
+        }
+
+        /* Footer */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 4rem;
+        }
+
+        /* Keyframes */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Disabled Links */
+        .disabled-link {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #2c3e50;
+            min-width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #34495e;
+        }
+
+        .dropdown-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .dropdown-btn:hover {
+            color: #18bc9c;
+        }
+
+        .dropdown-btn::after {
+            content: ' ▼';
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">NaSCon</div>
+        <ul>
+            <li class="dropdown">
+                <span class="dropdown-btn" id="eventsDropdown">Events</span>
+                <div class="dropdown-content">
+                    <a href="/event_management.html" id="createEventLink">Event Management</a>
+                    <a href="/event_categories.html" id="eventCategoriesLink">Categories</a>
+                    <a href="/event_rounds.html" id="eventRoundsLink">Rounds</a>
+                    <a href="/venue_management.html" id="venueManagementLink">Venues</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <span class="dropdown-btn" id="sponsorDropdown">Sponsorship</span>
+                <div class="dropdown-content">
+                    <a href="/sponsor_management.html" id="sponsorManagementLink">Sponsors</a>
+                    <a href="/sponsorship_packages.html" id="sponsorshipManagementLink">Packages</a>
+                    <a href="/sponsorship_payments.html" id="paymentManagementLink">Payments</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <span class="dropdown-btn" id="managementDropdown">Management</span>
+                <div class="dropdown-content">
+                    <a href="/checkin_management.html" id="checkinManagementLink">Check-in</a>
+                    <a href="/accommodation.html" id="accommodationManagementLink">Accommodation</a>
+                    <a href="/judge_assignment.html" id="judgeAssignmentLink">Judge Assignment</a>
+                    <a href="/judge_evaluation.html" id="judgeEvaluationLink">Evaluations</a>
+                </div>
+            </li>
+            <li><a href="/reports.html" id="reportsLink">Reports</a></li>
+            <li><a href="/user_profile.html" id="userProfileLink">Profile</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+
+    <!-- Hero Section -->
+    <header>
+        <h1>Welcome to NaSCon!</h1>
+        <p>NaSCon is an annual tech and business event by FAST-NUCES Islamabad, one of Pakistan's largest inter-university competitions.</p>
+    </header>
+
+    <!-- About Section -->
+    <section class="about">
+        <h2>About Us</h2>
+        <p>NaSCon is an annual tech and business extravaganza organized by FAST NUCES Islamabad. It is one of Pakistan's biggest inter-university competitions attracting participants from all over the country. It started as a small-scale technology-based competition and has now expanded into a national-level convention featuring diverse challenges in tech, business and engineering.</p>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <h2>We've Done It Before</h2>
+        <div class="stats-container">
+            <div class="stat">
+                <h3>70+</h3>
+                <p>Events</p>
+            </div>
+            <div class="stat">
+                <h3>5M+</h3>
+                <p>Raised</p>
+            </div>
+            <div class="stat">
+                <h3>3M+</h3>
+                <p>Prize Money</p>
+            </div>
+            <div class="stat">
+                <h3>80+</h3>
+                <p>Institutes</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sponsors Section -->
+    <section class="sponsors">
+        <h2>We Couldn't Have Done It Alone</h2>
+        <p>We appreciate our valued sponsors for their support in making NaSCon a success. Their contribution drives innovation, empowers talent, and helps us create an unforgettable experience.</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2025 NaSCon - All rights reserved.
+    </footer>
+
+    <!-- JS to manage roles -->
+    <script>
+        // Fetch the role from the server
+        fetch('/getRole')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.role) {
+                    handleRoleBasedAccess(data.role);
+                } else {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching role:', error);
+                window.location.href = '/';
+            });
+
+        // Update the role-based access control to handle dropdowns
+                function handleRoleBasedAccess(role) {
+            // Cache the elements
+            const createEventLink = document.getElementById('createEventLink');
+            const eventCategoriesLink = document.getElementById('eventCategoriesLink');
+            const eventRoundsLink = document.getElementById('eventRoundsLink');
+            const venueManagementLink = document.getElementById('venueManagementLink');
+            const sponsorManagementLink = document.getElementById('sponsorManagementLink');
+            const sponsorshipManagementLink = document.getElementById('sponsorshipManagementLink');
+            const paymentManagementLink = document.getElementById('paymentManagementLink');
+            const checkinManagementLink = document.getElementById('checkinManagementLink');
+            const accommodationManagementLink = document.getElementById('accommodationManagementLink');
+            const judgeAssignmentLink = document.getElementById('judgeAssignmentLink');
+            const judgeEvaluationLink = document.getElementById('judgeEvaluationLink');
+            const reportsLink = document.getElementById('reportsLink');
+            const userProfileLink = document.getElementById('userProfileLink');
+            const eventsDropdown = document.getElementById('eventsDropdown');
+            const sponsorDropdown = document.getElementById('sponsorDropdown');
+            const managementDropdown = document.getElementById('managementDropdown');
+            const navList = document.querySelector('nav ul');
+
+            // Hide all links by default
+            createEventLink.style.display = 'none';
+            eventCategoriesLink.style.display = 'none';
+            eventRoundsLink.style.display = 'none';
+            venueManagementLink.style.display = 'none';
+            sponsorManagementLink.style.display = 'none';
+            sponsorshipManagementLink.style.display = 'none';
+            paymentManagementLink.style.display = 'none';
+            checkinManagementLink.style.display = 'none';
+            accommodationManagementLink.style.display = 'none';
+            judgeAssignmentLink.style.display = 'none';
+            judgeEvaluationLink.style.display = 'none';
+            reportsLink.style.display = 'none';
+            userProfileLink.style.display = 'none';
+            eventsDropdown.style.display = 'none';
+            sponsorDropdown.style.display = 'none';
+            managementDropdown.style.display = 'none';
+
+            // Show links based on role
+            if (role === 'Admin') {
+                // Make sure navList is defined
+                if (!navList) {
+                    return;
+                }
+                
+                // Keep the existing dropdown menu structure but customize it for admin
+                eventsDropdown.style.display = 'inline';
+                sponsorDropdown.style.display = 'inline';
+                managementDropdown.style.display = 'inline';
+                reportsLink.style.display = 'inline';
+                userProfileLink.style.display = 'inline';
+                
+                // Show all links for admin
+                createEventLink.style.display = 'block';
+                eventCategoriesLink.style.display = 'block';
+                eventRoundsLink.style.display = 'block';
+                venueManagementLink.style.display = 'block';
+                sponsorManagementLink.style.display = 'block';
+                sponsorshipManagementLink.style.display = 'block';
+                paymentManagementLink.style.display = 'block';
+                checkinManagementLink.style.display = 'block';
+                accommodationManagementLink.style.display = 'block';
+                judgeAssignmentLink.style.display = 'block';
+                judgeEvaluationLink.style.display = 'block';
+                
+                // Update links to point to admin versions if they exist
+                createEventLink.href = '/event_management.html';
+                accommodationManagementLink.href = '/accommodation_management.html';
+                venueManagementLink.href = '/venue_management.html';
+                sponsorshipManagementLink.href = '/admin/sponsorship_packages.html';
+                // Add admin-specific links in a separate section
+                // Check if admin submenu exists, if not create it
+                if (!document.querySelector('#adminSubmenu')) {
+                    const adminLi = document.createElement('li');
+                    adminLi.className = 'dropdown';
+                    adminLi.innerHTML = `
+                        <span class="dropdown-btn">Admin</span>
+                        <div class="dropdown-content" id="adminSubmenu">
+                            <a href="/admin/role_requests.html">Role Requests</a>
+                            <a href="/admin/sponsor_requests.html">Sponsor Requests</a>
+                            <a href="/admin/user_management.html">User Management</a>
+                        </div>
+                    `;
+                    navList.appendChild(adminLi);
+                }
+                
+                // Update the Management dropdown to include rooms link
+                const managementContent = document.querySelector('#managementDropdown').nextElementSibling;
+                if (managementContent) {
+                    // Add rooms link to management dropdown if it doesn't exist
+                    if (!managementContent.querySelector('a[href="/admin/rooms.html"]')) {
+                        const roomsLink = document.createElement('a');
+                        roomsLink.href = '/admin/rooms.html';
+                        roomsLink.textContent = 'Rooms';
+                        managementContent.appendChild(roomsLink);
+                    }
+                }
+            } else if (role === 'Event Organizer') {
+                // Event Organizer can create and manage events, venues, and check-ins
+                eventsDropdown.style.display = 'inline';
+                managementDropdown.style.display = 'inline';
+                createEventLink.style.display = 'block';
+                eventCategoriesLink.style.display = 'block';
+                eventRoundsLink.style.display = 'block';
+                venueManagementLink.style.display = 'block';
+                checkinManagementLink.style.display = 'block';
+                userProfileLink.style.display = 'inline';
+
+            } else if (role === 'Participant') {
+                // Participant functionality - update links for participant role
+                userProfileLink.style.display = 'inline'; // View/edit profile
+                eventsDropdown.style.display = 'inline'; // Show Events dropdown
+                
+                // Change events link to the new events page
+                createEventLink.style.display = 'block';
+                createEventLink.href = '/events.html';
+                createEventLink.textContent = 'View Events';
+                
+                // Accommodation booking
+                managementDropdown.style.display = 'inline';
+                accommodationManagementLink.style.display = 'block';
+                accommodationManagementLink.href = '/accommodation.html';
+                accommodationManagementLink.textContent = 'Request Accommodation';
+                
+                // Add sponsorship packages link
+                if (!navList.querySelector('#sponsorshipPackagesLink')) {
+                    const sponsorshipLi = document.createElement('li');
+                    const sponsorshipLink = document.createElement('a');
+                    sponsorshipLink.id = 'sponsorshipPackagesLink';
+                    sponsorshipLink.href = '/sponsorship_packages.html';
+                    sponsorshipLink.textContent = 'Become a Sponsor';
+                    sponsorshipLi.appendChild(sponsorshipLink);
+                    navList.appendChild(sponsorshipLi);
+                }
+                
+                // Add link to request role
+                if (!navList.querySelector('#requestRoleLink')) {
+                    const requestRoleLi = document.createElement('li');
+                    const requestRoleLink = document.createElement('a');
+                    requestRoleLink.id = 'requestRoleLink';
+                    requestRoleLink.href = '/request_role.html';
+                    requestRoleLink.textContent = 'Request Role Change';
+                    requestRoleLi.appendChild(requestRoleLink);
+                    navList.appendChild(requestRoleLi);
+                }
+
+            } else if (role === 'Judge') {
+                // Judge can view events and submit evaluations
+                managementDropdown.style.display = 'inline';
+                judgeEvaluationLink.style.display = 'block';
+                userProfileLink.style.display = 'inline';
+
+            } else if (role === 'Sponsor') {
+                // Sponsor can manage their sponsorship and payments
+                sponsorDropdown.style.display = 'inline';
+                sponsorManagementLink.style.display = 'block';
+                sponsorshipManagementLink.style.display = 'block';
+                userProfileLink.style.display = 'inline';
+                
+                // Add link to contracts
+                if (!navList.querySelector('#sponsorContractsLink')) {
+                    const contractsLi = document.createElement('li');
+                    const contractsLink = document.createElement('a');
+                    contractsLink.id = 'sponsorContractsLink';
+                    contractsLink.href = '/sponsor_contracts.html';
+                    contractsLink.textContent = 'My Contracts';
+                    contractsLi.appendChild(contractsLink);
+                    navList.appendChild(contractsLi);
+                }
+            }
+        }
+
+        function addLink(href, text) {
+            // Get the nav list element again to ensure it's available
+            const navList = document.querySelector('nav ul');
+            if (!navList) {
+                console.error('Navigation list element not found in addLink function');
+                return;
+            }
+            
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = href;
+            a.textContent = text;
+            li.appendChild(a);
+            navList.appendChild(li);
+        }
+    </script>
+</body>
+</html>

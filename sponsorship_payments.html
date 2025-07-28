@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsorship Payments - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sponsor_management.html">Sponsors</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sponsorship_packages.html">Packages</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/sponsorship_payments.html">Payments</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Sponsorship Payments</h1>
+                <p class="lead">Track all sponsorship payments for NASCON events</p>
+            </div>
+        </div>
+
+        <div id="alertContainer" class="mb-4"></div>
+
+        <!-- Payment Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Payments</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0" id="totalPayments">Rs. 0</h3>
+                            <i class="bi bi-cash-coin fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Paid Contracts</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0" id="paidContracts">0</h3>
+                            <i class="bi bi-check-circle fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending Payments</h5>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0" id="pendingContracts">0</h3>
+                            <i class="bi bi-hourglass-split fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Contracts Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Pending Payments</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Contract ID</th>
+                                <th>Sponsor</th>
+                                <th>Package</th>
+                                <th>Amount</th>
+                                <th>Contract Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingContractsTable">
+                            <!-- Pending contracts will be populated here -->
+                            <tr>
+                                <td colspan="6" class="text-center">Loading pending contracts...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History Section -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Payment History</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchPayment" placeholder="Search payments..." onkeyup="filterPayments()">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Contract ID</th>
+                                <th>Sponsor</th>
+                                <th>Package</th>
+                                <th>Amount</th>
+                                <th>Payment Type</th>
+                                <th>Payment Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <!-- Payments will be populated here -->
+                            <tr>
+                                <td colspan="7" class="text-center">Loading payments...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // DOM Elements
+        const paymentsTableBody = document.getElementById('paymentsTableBody');
+        const pendingContractsTable = document.getElementById('pendingContractsTable');
+        const alertContainer = document.getElementById('alertContainer');
+        const totalPaymentsEl = document.getElementById('totalPayments');
+        const paidContractsEl = document.getElementById('paidContracts');
+        const pendingContractsEl = document.getElementById('pendingContracts');
+        
+        // All payments data
+        let allPayments = [];
+        let allContracts = [];
+        
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadContracts();
+            loadPayments();
+        });
+        
+        // Function to load contracts
+        async function loadContracts() {
+            try {
+                const response = await fetch('/api/admin/sponsorship-contracts');
+                if (response.status === 401) {
+                    showAlert('warning', 'You need admin privileges to view contracts');
+                    pendingContractsTable.innerHTML = '<tr><td colspan="6" class="text-center">Access denied - Admin privileges required</td></tr>';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch contracts');
+                }
+                
+                let contracts = await response.json();
+                
+                // Check if response has a data property
+                if (contracts.data) {
+                    contracts = contracts.data;
+                }
+                
+                allContracts = contracts;
+                
+                // Update summary
+                updateContractSummary();
+                
+                // Display pending contracts
+                displayPendingContracts();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load contracts: ' + error.message);
+            }
+        }
+        
+        // Function to load payments
+        async function loadPayments() {
+            try {
+                const response = await fetch('/api/admin/sponsorship-payments');
+                if (response.status === 401) {
+                    showAlert('warning', 'You need admin privileges to view payment information');
+                    paymentsTableBody.innerHTML = '<tr><td colspan="7" class="text-center">Access denied - Admin privileges required</td></tr>';
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch payments');
+                }
+                
+                let payments = await response.json();
+                
+                // Check if response has a data property
+                if (payments.data) {
+                    payments = payments.data;
+                }
+                
+                allPayments = payments;
+                displayPayments(allPayments);
+                
+                // Update total payments sum
+                updatePaymentSummary();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load payments: ' + error.message);
+            }
+        }
+        
+        // Function to update contract summary
+        function updateContractSummary() {
+            if (!allContracts || allContracts.length === 0) {
+                paidContractsEl.textContent = "0";
+                pendingContractsEl.textContent = "0";
+                return;
+            }
+            
+            const paidContracts = allContracts.filter(c => c.PaymentStatus === 'Paid').length;
+            const pendingContracts = allContracts.filter(c => c.PaymentStatus === 'Pending').length;
+            
+            paidContractsEl.textContent = paidContracts;
+            pendingContractsEl.textContent = pendingContracts;
+        }
+        
+        // Function to update payment summary
+        function updatePaymentSummary() {
+            if (!allPayments || allPayments.length === 0) {
+                totalPaymentsEl.textContent = `Rs. 0`;
+                return;
+            }
+            
+            const totalAmount = allPayments.reduce((sum, payment) => sum + parseFloat(payment.Amount || 0), 0);
+            totalPaymentsEl.textContent = `Rs. ${totalAmount.toLocaleString()}`;
+        }
+        
+        // Function to display pending contracts
+        function displayPendingContracts() {
+            const pendingContracts = allContracts.filter(c => c.PaymentStatus === 'Pending');
+            
+            if (pendingContracts.length === 0) {
+                pendingContractsTable.innerHTML = '<tr><td colspan="6" class="text-center">No pending payments</td></tr>';
+                return;
+            }
+            
+            pendingContractsTable.innerHTML = '';
+            pendingContracts.forEach(contract => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${contract.ContractID}</td>
+                    <td>${contract.CompanyName}</td>
+                    <td>${contract.PackageName}</td>
+                    <td>Rs. ${parseFloat(contract.PackageCost).toLocaleString()}</td>
+                    <td>${new Date(contract.ContractDate).toLocaleDateString()}</td>
+                    <td>
+                        <span class="badge bg-${contract.ContractStatus === 'Signed' ? 'success' : contract.ContractStatus === 'Expired' ? 'danger' : 'warning'}">
+                            ${contract.ContractStatus}
+                        </span>
+                    </td>
+                `;
+                pendingContractsTable.appendChild(row);
+            });
+        }
+        
+        // Function to display payments in the table
+        function displayPayments(payments) {
+            if (!payments || payments.length === 0) {
+                paymentsTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No payments found</td></tr>';
+                return;
+            }
+            
+            paymentsTableBody.innerHTML = '';
+            payments.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${payment.PaymentID}</td>
+                    <td>${payment.ContractID}</td>
+                    <td>${payment.CompanyName}</td>
+                    <td>${payment.PackageName}</td>
+                    <td>Rs. ${parseFloat(payment.Amount).toLocaleString()}</td>
+                    <td>${payment.PaymentType}</td>
+                    <td>${new Date(payment.PaymentDate).toLocaleString()}</td>
+                `;
+                paymentsTableBody.appendChild(row);
+            });
+        }
+        
+        // Function to filter payments by search
+        function filterPayments() {
+            const searchTerm = document.getElementById('searchPayment').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayPayments(allPayments);
+                return;
+            }
+            
+            const filteredPayments = allPayments.filter(payment => 
+                payment.CompanyName && payment.CompanyName.toLowerCase().includes(searchTerm) ||
+                payment.PackageName && payment.PackageName.toLowerCase().includes(searchTerm) ||
+                payment.PaymentID && payment.PaymentID.toString().includes(searchTerm) ||
+                payment.ContractID && payment.ContractID.toString().includes(searchTerm)
+            );
+            
+            displayPayments(filteredPayments);
+        }
+        
+        // Function to show alert messages
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alertHtml;
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+
+        // Check user role and show/hide admin specific elements
+        async function checkUserRole() {
+            try {
+                const response = await fetch('/api/user-role');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user role');
+                }
+                
+                const data = await response.json();
+                if (data.role !== 'Admin') {
+                    showAlert('warning', 'You need admin privileges to view all payment information');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to check user role');
+            }
+        }
+        
+        // Check user role on page load
+        document.addEventListener('DOMContentLoaded', checkUserRole);
+    </script>
+</body>
+</html> 

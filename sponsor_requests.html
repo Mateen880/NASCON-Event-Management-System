@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsorship Requests - NaSCon Admin</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f7f9fc;
+        }
+
+        /* Navbar */
+        nav {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #18bc9c;
+        }
+
+        /* Main content */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom-color: #18bc9c;
+            color: #18bc9c;
+            font-weight: 500;
+        }
+
+        /* Request cards */
+        .request-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .request-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .request-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .status-approved {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-rejected {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .request-details {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #616161;
+            width: 150px;
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background: #18bc9c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #159a80;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-light {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .btn-light:hover {
+            background: #bdc3c7;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: #7f8c8d;
+        }
+
+        .empty-state p {
+            margin-bottom: 1rem;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">NaSCon Admin</div>
+        <ul>
+            <li><a href="/event_management.html">Events</a></li>
+            <li class="dropdown">
+                <a href="#">Management</a>
+                <ul class="dropdown-menu">
+                    <li><a href="/admin/rooms.html">Rooms</a></li>
+                    <li><a href="/accommodation_management.html">Accommodation</a></li>
+                    <li><a href="/checkin_management.html">Check-ins</a></li>
+                </ul>
+            </li>
+            <li><a href="/admin/role_requests.html">Role Requests</a></li>
+            <li><a href="/admin/sponsor_requests.html">Sponsor Requests</a></li>
+            <li><a href="/homepage.html">Home</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Sponsorship Requests</h1>
+        
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success hidden"></div>
+        <div id="alertError" class="alert alert-danger hidden"></div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-status="all">All Requests</div>
+            <div class="tab" data-status="Pending">Pending</div>
+            <div class="tab" data-status="Approved">Approved</div>
+            <div class="tab" data-status="Rejected">Rejected</div>
+        </div>
+        
+        <!-- Request List -->
+        <div id="requestList" class="request-list">
+            <div class="loading">Loading requests...</div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let requests = [];
+        let packages = {};
+        let currentFilter = 'all';
+
+        // DOM elements
+        const requestList = document.getElementById('requestList');
+        const tabs = document.querySelectorAll('.tab');
+        const alertSuccess = document.getElementById('alertSuccess');
+        const alertError = document.getElementById('alertError');
+
+        // Fetch data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch sponsorship packages first
+            fetchSponsorshipPackages()
+                .then(() => {
+                    // Then fetch the requests
+                    fetchRequests();
+                });
+            
+            // Set up tab listeners
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.status;
+                    renderRequests();
+                });
+            });
+        });
+
+        // Function to fetch sponsorship packages
+        function fetchSponsorshipPackages() {
+            return fetch('/api/sponsorship-packages')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch packages');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Convert array to an object indexed by ID for easier lookup
+                    data.forEach(pkg => {
+                        packages[pkg.PackageID] = pkg;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching packages:', error);
+                    showError('Failed to load sponsorship packages');
+                });
+        }
+
+        // Function to fetch sponsorship requests
+        function fetchRequests() {
+            fetch('/api/admin/sponsorship-requests')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch requests');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    requests = data.data || [];
+                    renderRequests();
+                })
+                .catch(error => {
+                    console.error('Error fetching requests:', error);
+                    requestList.innerHTML = '<div class="empty-state"><p>Failed to load sponsorship requests. Please try again later.</p></div>';
+                });
+        }
+
+        // Function to render requests
+        function renderRequests() {
+            // Clear any alerts
+            alertSuccess.classList.add('hidden');
+            alertError.classList.add('hidden');
+            
+            // Filter requests if needed
+            let filteredRequests = requests;
+            if (currentFilter !== 'all') {
+                filteredRequests = requests.filter(req => req.Status === currentFilter);
+            }
+            
+            if (filteredRequests.length === 0) {
+                requestList.innerHTML = `
+                    <div class="empty-state">
+                        <p>No ${currentFilter === 'all' ? '' : currentFilter.toLowerCase()} sponsorship requests found.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredRequests.forEach(req => {
+                const packageInfo = packages[req.PackageID] || { PackageName: 'Unknown', PackageCost: 0 };
+                
+                html += `
+                    <div class="request-card">
+                        <div class="request-header">
+                            <div class="request-title">${req.CompanyName} - ${packageInfo.PackageName}</div>
+                            <div class="request-status status-${req.Status.toLowerCase()}">${req.Status}</div>
+                        </div>
+                        <div class="request-details">
+                            <div class="detail-row">
+                                <div class="detail-label">Company Email:</div>
+                                <div class="detail-value">${req.CompanyEmail}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Company Phone:</div>
+                                <div class="detail-value">${req.CompanyPhone || 'Not provided'}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Package:</div>
+                                <div class="detail-value">${packageInfo.PackageName} (Rs. ${packageInfo.PackageCost ? packageInfo.PackageCost.toLocaleString() : 'N/A'})</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Request Date:</div>
+                                <div class="detail-value">${new Date(req.RequestTimestamp).toLocaleDateString()}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">Details:</div>
+                                <div class="detail-value">${req.Details || 'No details provided'}</div>
+                            </div>
+                        </div>
+                `;
+                
+                // Only show action buttons for pending requests
+                if (req.Status === 'Pending') {
+                    html += `
+                        <div class="request-actions">
+                            <button class="btn btn-primary" onclick="approveRequest(${req.RequestID})">Approve</button>
+                            <button class="btn btn-danger" onclick="rejectRequest(${req.RequestID})">Reject</button>
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`;
+            });
+
+            requestList.innerHTML = html;
+        }
+
+        // Function to approve a request
+        function approveRequest(requestId) {
+            fetch(`/api/admin/sponsorship-requests/${requestId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to approve request');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show success message
+                alertSuccess.textContent = data.message || 'Sponsorship request approved successfully';
+                alertSuccess.classList.remove('hidden');
+                
+                // Update the request in the local array
+                const requestIndex = requests.findIndex(req => req.RequestID === requestId);
+                if (requestIndex !== -1) {
+                    requests[requestIndex].Status = 'Approved';
+                }
+                
+                // Re-render the requests
+                renderRequests();
+                
+                // Scroll to the success message
+                alertSuccess.scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(error => {
+                // Show error message
+                alertError.textContent = error.message || 'Failed to approve sponsorship request';
+                alertError.classList.remove('hidden');
+                console.error('Error approving sponsorship request:', error);
+                
+                // Scroll to the error message
+                alertError.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+        // Function to reject a request
+        function rejectRequest(requestId) {
+            fetch(`/api/admin/sponsorship-requests/${requestId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.message || 'Failed to reject request');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show success message
+                alertSuccess.textContent = data.message || 'Sponsorship request rejected successfully';
+                alertSuccess.classList.remove('hidden');
+                
+                // Update the request in the local array
+                const requestIndex = requests.findIndex(req => req.RequestID === requestId);
+                if (requestIndex !== -1) {
+                    requests[requestIndex].Status = 'Rejected';
+                }
+                
+                // Re-render the requests
+                renderRequests();
+                
+                // Scroll to the success message
+                alertSuccess.scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(error => {
+                // Show error message
+                alertError.textContent = error.message || 'Failed to reject sponsorship request';
+                alertError.classList.remove('hidden');
+                console.error('Error rejecting sponsorship request:', error);
+                
+                // Scroll to the error message
+                alertError.scrollIntoView({ behavior: 'smooth' });
+            });
+        }
+
+        // Utility function to show error
+        function showError(message) {
+            alertError.textContent = message;
+            alertError.classList.remove('hidden');
+            alertError.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html> 

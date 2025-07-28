@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judge Assignment - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/judge_assignment.html">Judge Assignment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/event_management.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- Alert container -->
+        <div id="alertContainer" class="mb-3"></div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Judge Assignment Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-5">
+                                <select class="form-select" id="eventSelect" onchange="loadEventJudges()">
+                                    <option value="">Select Event</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="judgeRoleSelect">
+                                    <option value="">All Judge Roles</option>
+                                    <option value="1">Head Judge</option>
+                                    <option value="2">Assistant Judge</option>
+                                    <option value="3">Panel Member</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary w-100" onclick="openAssignJudgeModal()">
+                                    <i class="bi bi-plus-circle"></i> Assign Judge
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Judge Name</th>
+                                        <th>Email</th>
+                                        <th>Expertise</th>
+                                        <th>Role</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="judgeTableBody">
+                                    <!-- Judges will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Judge Modal -->
+    <div class="modal fade" id="assignJudgeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Judge</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignJudgeForm">
+                        <input type="hidden" id="selectedEventId">
+                        <div class="mb-3">
+                            <label for="judgeSelect" class="form-label">Select Judge</label>
+                            <select class="form-select" id="judgeSelect" required>
+                                <option value="">Select a judge</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="roleSelect" class="form-label">Judge Role</label>
+                            <select class="form-select" id="roleSelect" required>
+                                <option value="">Select a role</option>
+                                <option value="1">Head Judge</option>
+                                <option value="2">Assistant Judge</option>
+                                <option value="3">Panel Member</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="assignJudge()">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentEventId = null;
+        let assignJudgeModal = null;
+
+        // Show alert function
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+            alertElement.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            alertContainer.innerHTML = '';
+            alertContainer.appendChild(alertElement);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = bootstrap.Alert.getInstance(alertElement);
+                if (alert) {
+                    alert.close();
+                } else {
+                    alertElement.remove();
+                }
+            }, 5000);
+        }
+
+        // First load events and initialize modal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check user role before proceeding
+            checkUserRole();
+        });
+        
+        // Check if user has the correct role to access this page
+        function checkUserRole() {
+            fetch('/getRole')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user role');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.role === 'Admin' || data.role === 'Event Organizer') {
+                        // User is authorized, proceed with initialization
+                        loadEvents();
+                        assignJudgeModal = new bootstrap.Modal(document.getElementById('assignJudgeModal'));
+                        document.getElementById('judgeRoleSelect').addEventListener('change', filterJudgesByRole);
+                    } else {
+                        // User is not authorized, redirect to homepage
+                        showAlert('danger', 'You do not have permission to access this page');
+                        setTimeout(() => {
+                            window.location.href = '/homepage.html';
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching user role:', error);
+                    showAlert('danger', 'Failed to verify permissions. Redirecting to homepage.');
+                    setTimeout(() => {
+                        window.location.href = '/homepage.html';
+                    }, 2000);
+                });
+        }
+
+        // Load all events
+        async function loadEvents() {
+            try {
+                const response = await fetch('/api/events');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+                const events = await response.json();
+                
+                const select = document.getElementById('eventSelect');
+                select.innerHTML = '<option value="">Select Event</option>';
+                
+                events.forEach(event => {
+                    const option = document.createElement('option');
+                    option.value = event.Event_ID;
+                    option.textContent = event.EventName;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading events:', error);
+                showAlert('danger', 'Failed to load events: ' + error.message);
+            }
+        }
+
+        // Load judges assigned to an event
+        async function loadEventJudges() {
+            const eventId = document.getElementById('eventSelect').value;
+            if (!eventId) {
+                document.getElementById('judgeTableBody').innerHTML = '';
+                currentEventId = null;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/event-judges/${eventId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch judges for this event');
+                }
+                
+                const judges = await response.json();
+                currentEventId = eventId;
+                document.getElementById('selectedEventId').value = eventId;
+                
+                renderJudgeTable(judges);
+            } catch (error) {
+                console.error('Error loading event judges:', error);
+                showAlert('danger', 'Failed to load judges: ' + error.message);
+            }
+        }
+
+        // Render the judge table
+        function renderJudgeTable(judges) {
+            const tbody = document.getElementById('judgeTableBody');
+            tbody.innerHTML = '';
+            
+            if (judges.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No judges assigned to this event yet</td></tr>';
+                return;
+            }
+            
+            judges.forEach(judge => {
+                const row = document.createElement('tr');
+                row.dataset.judgeId = judge.JudgeID;
+                row.dataset.roleId = judge.JudgeRoleID;
+                
+                row.innerHTML = `
+                    <td>${judge.UserName}</td>
+                    <td>${judge.Email}</td>
+                    <td>${judge.Expertise || 'Not specified'}</td>
+                    <td>${judge.JudgeRole}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="removeJudge(${judge.JudgeID})">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Filter judges by role
+        function filterJudgesByRole() {
+            const roleId = document.getElementById('judgeRoleSelect').value;
+            const rows = document.querySelectorAll('#judgeTableBody tr');
+            
+            if (!roleId) {
+                // Show all rows
+                rows.forEach(row => {
+                    row.style.display = '';
+                });
+                return;
+            }
+            
+            // Filter rows
+            rows.forEach(row => {
+                if (row.dataset.roleId === roleId) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Load available judges (not yet assigned to this event)
+        async function loadAvailableJudges() {
+            if (!currentEventId) {
+                showAlert('warning', 'Please select an event first');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/judges?eventId=${currentEventId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch available judges');
+                }
+                
+                const judges = await response.json();
+                const select = document.getElementById('judgeSelect');
+                select.innerHTML = '<option value="">Select a judge</option>';
+                
+                if (judges.length === 0) {
+                    select.innerHTML = '<option value="">No available judges</option>';
+                    return;
+                }
+                
+                judges.forEach(judge => {
+                    const option = document.createElement('option');
+                    option.value = judge.JudgeID;
+                    option.textContent = `${judge.UserName} - ${judge.Expertise || 'No expertise listed'}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading available judges:', error);
+                showAlert('danger', 'Failed to load available judges: ' + error.message);
+            }
+        }
+
+        // Open the assign judge modal
+        function openAssignJudgeModal() {
+            if (!currentEventId) {
+                showAlert('warning', 'Please select an event first');
+                return;
+            }
+            
+            document.getElementById('assignJudgeForm').reset();
+            loadAvailableJudges();
+            assignJudgeModal.show();
+        }
+
+        // Assign a judge to the selected event
+        async function assignJudge() {
+            const eventId = document.getElementById('selectedEventId').value;
+            const judgeId = document.getElementById('judgeSelect').value;
+            const roleId = document.getElementById('roleSelect').value;
+            
+            if (!judgeId) {
+                showAlert('warning', 'Please select a judge');
+                return;
+            }
+            
+            if (!roleId) {
+                showAlert('warning', 'Please select a role for the judge');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/event-judges', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        eventId,
+                        judgeId,
+                        judgeRoleId: roleId
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to assign judge');
+                }
+                
+                const data = await response.json();
+                showAlert('success', data.message || 'Judge assigned successfully');
+                assignJudgeModal.hide();
+                loadEventJudges();
+            } catch (error) {
+                console.error('Error assigning judge:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // Remove a judge from the event
+        async function removeJudge(judgeId) {
+            if (!currentEventId || !judgeId) {
+                showAlert('warning', 'Missing event or judge information');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to remove this judge from the event?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/event-judges/${currentEventId}/${judgeId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to remove judge');
+                }
+                
+                const data = await response.json();
+                showAlert('success', data.message || 'Judge removed successfully');
+                loadEventJudges();
+            } catch (error) {
+                console.error('Error removing judge:', error);
+                showAlert('danger', error.message);
+            }
+        }
+    </script>
+</body>
+</html> 

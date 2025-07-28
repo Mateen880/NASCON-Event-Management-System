@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sponsor an Event</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f7f7f7;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .package {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .package button {
+            margin-top: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .package button:hover {
+            background-color: #0056b3;
+        }
+        .sponsor-form {
+            background: white;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        input, select {
+            width: 95%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+        #submitBtn {
+            margin-top: 10px;
+            background-color: #28a745;
+        }
+        #submitBtn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Sponsor an Event</h1>
+
+<div id="packages"></div>
+
+<div class="sponsor-form" id="sponsorForm">
+    <h2>Fill Sponsor Details</h2>
+    <form id="form">
+        <input type="text" id="companyName" placeholder="Company Name" required><br>
+        <input type="email" id="email" placeholder="Email" required><br>
+        <input type="text" id="phone" placeholder="Phone Number" required><br>
+        <input type="hidden" id="selectedPackageId">
+        <button type="submit" id="submitBtn">Submit Sponsorship</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/sponsorship-packages')
+            .then(response => response.json())
+            .then(data => {
+                const packageContainer = document.getElementById('packages');
+                data.forEach(pkg => {
+                    const div = document.createElement('div');
+                    div.classList.add('package');
+                    div.innerHTML = `
+                        <h2>${pkg.PackageName}</h2>
+                        <p><strong>Details:</strong> ${pkg.PackageDetails}</p>
+                        <p><strong>Cost:</strong> $${pkg.PackageCost}</p>
+                        <button onclick="selectPackage(${pkg.PackageID})">Sponsor This Package</button>
+                    `;
+                    packageContainer.appendChild(div);
+                });
+            });
+    });
+
+    function selectPackage(packageId) {
+        document.getElementById('sponsorForm').style.display = 'block';
+        document.getElementById('selectedPackageId').value = packageId;
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    document.getElementById('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const companyName = document.getElementById('companyName').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const packageId = document.getElementById('selectedPackageId').value;
+
+        fetch('/submit-sponsorship', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ companyName, email, phone, packageId })
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            window.location.href = '/homepage.html';
+        })
+        .catch(err => console.error(err));
+    });
+</script>
+
+</body>
+</html>

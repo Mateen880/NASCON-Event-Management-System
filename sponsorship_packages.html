@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsorship Packages Management - NASCON Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/event_management.html">Events</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Management
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/accommodation_management.html">Accommodation</a></li>
+                            <li><a class="dropdown-item" href="/admin/rooms.html">Rooms</a></li>
+                            <li><a class="dropdown-item" href="/checkin_management.html">Check-ins</a></li>
+                            <li><a class="dropdown-item" href="/admin/judge_assignment.html">Judge Assignment</a></li>
+                            <li><a class="dropdown-item" href="/admin/evaluation.html">Evaluations</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/user_management.html">User Management</a></li>
+                            <li><a class="dropdown-item" href="/admin/role_requests.html">Role Requests</a></li>
+                            <li><a class="dropdown-item" href="/sponsor_management.html">Sponsors</a></li>
+                            <li><a class="dropdown-item active" href="/admin/sponsorship_packages.html">Sponsorship Packages</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutButton">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="alertContainer" class="mb-4"></div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Sponsorship Packages</h2>
+            <button class="btn btn-primary" onclick="openAddPackageModal()">
+                <i class="bi bi-plus-circle"></i> Add New Package
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Package Name</th>
+                                <th>Price</th>
+                                <th>Active Contracts</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="packagesTableBody">
+                            <!-- Packages will be populated here -->
+                            <tr>
+                                <td colspan="5" class="text-center">Loading packages...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Package Modal -->
+    <div class="modal fade" id="addPackageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Sponsorship Package</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addPackageForm">
+                        <div class="mb-3">
+                            <label for="packageName" class="form-label">Package Name</label>
+                            <input type="text" class="form-control" id="packageName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="packageCost" class="form-label">Price (Rs.)</label>
+                            <input type="number" class="form-control" id="packageCost" min="0" step="1000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="packageDetails" class="form-label">Package Details</label>
+                            <textarea class="form-control" id="packageDetails" rows="5" required></textarea>
+                            <div class="form-text">Describe what's included in this package (benefits, visibility, etc.)</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addPackage()">Add Package</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Package Modal -->
+    <div class="modal fade" id="editPackageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Sponsorship Package</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPackageForm">
+                        <input type="hidden" id="editPackageId">
+                        <div class="mb-3">
+                            <label for="editPackageName" class="form-label">Package Name</label>
+                            <input type="text" class="form-control" id="editPackageName" required>
+                            <div class="form-text text-muted">Note: Changing the name can affect existing sponsorships</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPackageCost" class="form-label">Price (Rs.)</label>
+                            <input type="number" class="form-control" id="editPackageCost" min="0" step="1000" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPackageDetails" class="form-label">Package Details</label>
+                            <textarea class="form-control" id="editPackageDetails" rows="5" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updatePackage()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Package Modal -->
+    <div class="modal fade" id="viewPackageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Package Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="packageDetailsSection">
+                        <!-- Package details will be populated here -->
+                    </div>
+                    <div id="packageContractsSection" class="mt-4">
+                        <h5>Active Contracts</h5>
+                        <div id="packageContracts">
+                            <!-- Contracts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let packages = [];
+        let contracts = [];
+        let selectedPackageId = null;
+        
+        // Bootstrap Modal Instances
+        let addPackageModal;
+        let editPackageModal;
+        let viewPackageModal;
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize modals
+            addPackageModal = new bootstrap.Modal(document.getElementById('addPackageModal'));
+            editPackageModal = new bootstrap.Modal(document.getElementById('editPackageModal'));
+            viewPackageModal = new bootstrap.Modal(document.getElementById('viewPackageModal'));
+            
+            // Load data
+            loadPackages();
+            loadContracts();
+        });
+
+        // Load all packages
+        async function loadPackages() {
+            try {
+                const response = await fetch('/api/admin/sponsorship-packages');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch packages');
+                }
+                
+                packages = await response.json();
+                displayPackages();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load sponsorship packages: ' + error.message);
+            }
+        }
+
+        // Load all contracts for reference
+        async function loadContracts() {
+            try {
+                const response = await fetch('/api/admin/sponsorship-contracts');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch contracts');
+                }
+                
+                contracts = await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                // Non-critical, so just log the error
+            }
+        }
+
+        // Display packages in the table
+        function displayPackages() {
+            const tbody = document.getElementById('packagesTableBody');
+            tbody.innerHTML = '';
+            
+            if (!packages || packages.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No sponsorship packages found</td></tr>';
+                return;
+            }
+            
+            packages.forEach(pkg => {
+                // Count active contracts for this package
+                const packageContracts = contracts.filter(
+                    contract => contract.PackageID === pkg.PackageID && contract.ContractStatus !== 'Expired'
+                );
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${pkg.PackageID}</td>
+                    <td>${pkg.PackageName}</td>
+                    <td>Rs. ${parseFloat(pkg.PackageCost).toLocaleString()}</td>
+                    <td>${packageContracts.length}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-1" onclick="viewPackage(${pkg.PackageID})">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-warning me-1" onclick="openEditPackageModal(${pkg.PackageID})">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deletePackage(${pkg.PackageID})" 
+                                ${packageContracts.length > 0 ? 'disabled' : ''}>
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Open add package modal
+        function openAddPackageModal() {
+            document.getElementById('addPackageForm').reset();
+            addPackageModal.show();
+        }
+
+        // Add a new package
+        async function addPackage() {
+            const packageName = document.getElementById('packageName').value;
+            const packageCost = document.getElementById('packageCost').value;
+            const packageDetails = document.getElementById('packageDetails').value;
+            
+            if (!packageName || !packageCost || !packageDetails) {
+                showAlert('danger', 'Please fill all required fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/sponsorship-packages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        packageName,
+                        packageCost,
+                        packageDetails
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to create package');
+                }
+                
+                const data = await response.json();
+                showAlert('success', data.message || 'Package created successfully');
+                
+                // Reset form and close modal
+                document.getElementById('addPackageForm').reset();
+                addPackageModal.hide();
+                
+                // Reload packages
+                loadPackages();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // Open edit package modal
+        function openEditPackageModal(packageId) {
+            const pkg = packages.find(p => p.PackageID === packageId);
+            if (!pkg) return;
+            
+            selectedPackageId = packageId;
+            
+            document.getElementById('editPackageId').value = pkg.PackageID;
+            document.getElementById('editPackageName').value = pkg.PackageName;
+            document.getElementById('editPackageCost').value = pkg.PackageCost;
+            document.getElementById('editPackageDetails').value = pkg.PackageDetails;
+            
+            editPackageModal.show();
+        }
+
+        // Update package
+        async function updatePackage() {
+            const packageId = document.getElementById('editPackageId').value;
+            const packageName = document.getElementById('editPackageName').value;
+            const packageCost = document.getElementById('editPackageCost').value;
+            const packageDetails = document.getElementById('editPackageDetails').value;
+            
+            if (!packageName || !packageCost || !packageDetails) {
+                showAlert('danger', 'Please fill all required fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/sponsorship-packages/${packageId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        packageName,
+                        packageCost,
+                        packageDetails
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to update package');
+                }
+                
+                const data = await response.json();
+                showAlert('success', data.message || 'Package updated successfully');
+                
+                // Close modal
+                editPackageModal.hide();
+                
+                // Reload packages
+                loadPackages();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // View package details
+        function viewPackage(packageId) {
+            const pkg = packages.find(p => p.PackageID === packageId);
+            if (!pkg) return;
+            
+            // Get contracts for this package
+            const packageContracts = contracts.filter(
+                contract => contract.PackageID === pkg.PackageID
+            );
+            
+            // Update package details section
+            const detailsSection = document.getElementById('packageDetailsSection');
+            detailsSection.innerHTML = `
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Package Name:</strong> ${pkg.PackageName}</p>
+                        <p><strong>Price:</strong> Rs. ${parseFloat(pkg.PackageCost).toLocaleString()}</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h6>Package Details:</h6>
+                    <div class="p-3 bg-light rounded">
+                        ${pkg.PackageDetails ? pkg.PackageDetails.replace(/\n/g, '<br>') : 'No details available'}
+                    </div>
+                </div>
+            `;
+            
+            // Update contracts section
+            const contractsSection = document.getElementById('packageContracts');
+            if (packageContracts.length === 0) {
+                contractsSection.innerHTML = '<p>No contracts found for this package.</p>';
+            } else {
+                let contractsHtml = '<div class="table-responsive"><table class="table table-sm">';
+                contractsHtml += `
+                    <thead>
+                        <tr>
+                            <th>Contract ID</th>
+                            <th>Sponsor</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                `;
+                
+                packageContracts.forEach(contract => {
+                    const contractStatusClass = contract.ContractStatus === 'Signed' ? 'text-success' : 
+                                                contract.ContractStatus === 'Expired' ? 'text-danger' : 'text-warning';
+                    
+                    const paymentStatusClass = contract.PaymentStatus === 'Paid' ? 'text-success' : 
+                                              contract.PaymentStatus === 'Overdue' ? 'text-danger' : 'text-warning';
+                    
+                    contractsHtml += `
+                        <tr>
+                            <td>${contract.ContractID}</td>
+                            <td>${contract.CompanyName}</td>
+                            <td>${new Date(contract.ContractDate).toLocaleDateString()}</td>
+                            <td><span class="${contractStatusClass}">${contract.ContractStatus}</span></td>
+                            <td><span class="${paymentStatusClass}">${contract.PaymentStatus}</span></td>
+                        </tr>
+                    `;
+                });
+                
+                contractsHtml += '</tbody></table></div>';
+                contractsSection.innerHTML = contractsHtml;
+            }
+            
+            // Show the modal
+            viewPackageModal.show();
+        }
+
+        // Delete package
+        async function deletePackage(packageId) {
+            // Check if package has contracts
+            const packageContracts = contracts.filter(
+                contract => contract.PackageID === packageId
+            );
+            
+            if (packageContracts.length > 0) {
+                showAlert('warning', 'Cannot delete a package with active contracts');
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to delete this package?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/sponsorship-packages/${packageId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete package');
+                }
+                
+                showAlert('success', 'Package deleted successfully');
+                loadPackages();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // Logout functionality
+        document.getElementById('logoutButton').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/login.html';
+                } else {
+                    alert('Logout failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Logout failed');
+            }
+        });
+
+        // Function to show alert messages
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alertHtml;
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Judge Evaluation - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/judge_evaluation.html">Evaluations</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Select Event & Round</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="eventSelect" class="form-label">Event</label>
+                            <select class="form-select" id="eventSelect" onchange="loadRounds()">
+                                <option value="">Select event...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="roundSelect" class="form-label">Round</label>
+                            <select class="form-select" id="roundSelect" onchange="loadParticipants()">
+                                <option value="">Select round...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Participants to Evaluate</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Participant ID</th>
+                                        <th>Name</th>
+                                        <th>University</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="participantsTableBody">
+                                    <!-- Participants will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluation Modal -->
+    <div class="modal fade" id="evaluationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Submit Evaluation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="evaluationForm">
+                        <input type="hidden" id="evaluationParticipantId">
+                        <input type="hidden" id="evaluationRoundId">
+                        <div class="mb-3">
+                            <label class="form-label">Participant</label>
+                            <p id="participantName" class="form-control-static"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">University</label>
+                            <p id="participantUniversity" class="form-control-static"></p>
+                        </div>
+                        <div class="mb-3">
+                            <label for="technicalScore" class="form-label">Technical Score (0-100)</label>
+                            <input type="number" class="form-control" id="technicalScore" min="0" max="100" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="presentationScore" class="form-label">Presentation Score (0-100)</label>
+                            <input type="number" class="form-control" id="presentationScore" min="0" max="100" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="innovationScore" class="form-label">Innovation Score (0-100)</label>
+                            <input type="number" class="form-control" id="innovationScore" min="0" max="100" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments</label>
+                            <textarea class="form-control" id="comments" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="submitEvaluation()">Submit Evaluation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadEvents() {
+            try {
+                const response = await fetch('/api/events');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch events');
+                }
+                const events = await response.json();
+                const select = document.getElementById('eventSelect');
+                select.innerHTML = '<option value="">Select event...</option>';
+                
+                events.forEach(event => {
+                    select.innerHTML += `<option value="${event.Event_ID}">${event.EventName}</option>`;
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load events');
+            }
+        }
+
+        async function loadRounds() {
+            const eventId = document.getElementById('eventSelect').value;
+            if (!eventId) return;
+
+            try {
+                const response = await fetch(`/api/event-rounds?eventId=${eventId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch rounds');
+                }
+                const rounds = await response.json();
+                const select = document.getElementById('roundSelect');
+                select.innerHTML = '<option value="">Select round...</option>';
+                
+                rounds.forEach(round => {
+                    select.innerHTML += `<option value="${round.RoundID}">${round.RoundName}</option>`;
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load rounds');
+            }
+        }
+
+        async function loadParticipants() {
+            const roundId = document.getElementById('roundSelect').value;
+            if (!roundId) return;
+
+            try {
+                const response = await fetch(`/api/round-participants/${roundId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch participants');
+                }
+                const participants = await response.json();
+                const tbody = document.getElementById('participantsTableBody');
+                tbody.innerHTML = '';
+
+                participants.forEach(participant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${participant.ParticipantID}</td>
+                        <td>${participant.Name}</td>
+                        <td>${participant.University}</td>
+                        <td>${participant.EvaluationStatus || 'Pending'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="openEvaluationModal(${participant.ParticipantID}, '${participant.Name}', '${participant.University}')">
+                                <i class="bi bi-pencil"></i> Evaluate
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load participants');
+            }
+        }
+
+        function openEvaluationModal(participantId, name, university) {
+            document.getElementById('evaluationParticipantId').value = participantId;
+            document.getElementById('evaluationRoundId').value = document.getElementById('roundSelect').value;
+            document.getElementById('participantName').textContent = name;
+            document.getElementById('participantUniversity').textContent = university;
+            new bootstrap.Modal(document.getElementById('evaluationModal')).show();
+        }
+
+        async function submitEvaluation() {
+            const evaluationData = {
+                participantId: document.getElementById('evaluationParticipantId').value,
+                roundId: document.getElementById('evaluationRoundId').value,
+                technicalScore: document.getElementById('technicalScore').value,
+                presentationScore: document.getElementById('presentationScore').value,
+                innovationScore: document.getElementById('innovationScore').value,
+                comments: document.getElementById('comments').value
+            };
+
+            try {
+                const response = await fetch('/api/evaluations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(evaluationData)
+                });
+
+                if (response.ok) {
+                    alert('Evaluation submitted successfully!');
+                    document.getElementById('evaluationModal').querySelector('.btn-close').click();
+                    loadParticipants();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Failed to submit evaluation');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the evaluation');
+            }
+        }
+
+        // Load events when page loads
+        document.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
+</body>
+</html> 

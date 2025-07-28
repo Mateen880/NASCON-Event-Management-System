@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASCON Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .event-card {
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .btn-register {
+            background-color: #18bc9c;
+            border-color: #18bc9c;
+        }
+        .btn-register:hover {
+            background-color: #159a80;
+            border-color: #159a80;
+        }
+        .card-footer {
+            background-color: rgba(24, 188, 156, 0.1);
+        }
+        .category-badge {
+            background-color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/events.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accommodation.html">Accommodation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/request_role.html">Request Role</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-4">Upcoming Events</h1>
+                <p class="lead">Browse and register for NASCON events</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search events...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <select id="categoryFilter" class="form-select">
+                    <option value="">All Categories</option>
+                    <!-- Categories will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <div id="eventAlert" class="alert alert-danger d-none" role="alert"></div>
+
+        <div id="eventsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- Events will be populated here -->
+            <div class="col text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div class="modal fade" id="registrationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register for Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registrationForm">
+                        <input type="hidden" id="eventId" name="eventId">
+                        <div class="mb-3" id="eventDetails">
+                            <!-- Event details will be populated here -->
+                        </div>
+                        <div class="mb-3">
+                            <label for="teamSelect" class="form-label">Register as:</label>
+                            <select class="form-select" id="teamSelect" required>
+                                <option value="individual">Individual</option>
+                                <option value="team">Team</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 d-none" id="teamIdGroup">
+                            <label for="teamId" class="form-label">Enter Team ID:</label>
+                            <input type="number" class="form-control" id="teamId" min="1">
+                            <div class="form-text">Enter your team ID if you already have a team</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="submitRegistration">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="eventDetailsContent">
+                    <!-- Event details will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="showRegistrationModal">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // DOM Elements
+        const eventsContainer = document.getElementById('eventsContainer');
+        const eventAlert = document.getElementById('eventAlert');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const teamSelect = document.getElementById('teamSelect');
+        const teamIdGroup = document.getElementById('teamIdGroup');
+        const registrationModal = new bootstrap.Modal(document.getElementById('registrationModal'));
+        const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+        
+        // Global variables
+        let allEvents = [];
+        let currentEvent = null;
+
+        // Check if user is authenticated
+        fetch('/getRole')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Not authenticated');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.role !== 'Participant') {
+                    showAlert('You must be logged in as a Participant to view events.');
+                    return;
+                }
+                
+                // Fetch events
+                fetchEvents();
+                // Fetch categories for filter
+                fetchCategories();
+            })
+            .catch(error => {
+                showAlert('Please log in to view events');
+                console.error('Authentication error:', error);
+            });
+
+        // Fetch events from server
+        function fetchEvents(categoryId) {
+            let url = '/events';
+            
+            // Add category filter if provided
+            if (categoryId) {
+                url += `?categoryId=${categoryId}`;
+            }
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch events');
+                    }
+                    return response.json();
+                })
+                .then(events => {
+                    allEvents = events;
+                    displayEvents(events);
+                })
+                .catch(error => {
+                    showAlert('Failed to load events: ' + error.message);
+                    console.error('Error fetching events:', error);
+                });
+        }
+
+        // Fetch categories for filter
+        function fetchCategories() {
+            fetch('/api/categories')
+                .then(response => response.json())
+                .then(categories => {
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.CategoryID;
+                        option.textContent = category.CategoryName;
+                        categoryFilter.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching categories:', error));
+        }
+
+        // Display events in the container
+        function displayEvents(events) {
+            eventsContainer.innerHTML = '';
+            
+            if (events.length === 0) {
+                eventsContainer.innerHTML = '<div class="col-12 text-center"><h3>No events found</h3></div>';
+                return;
+            }
+
+            events.forEach(event => {
+                const eventDate = new Date(event.EventDateTime);
+                const dateOptions = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                const formattedDate = eventDate.toLocaleDateString('en-US', dateOptions);
+                
+                const card = document.createElement('div');
+                card.className = 'col';
+                card.innerHTML = `
+                    <div class="card event-card">
+                        <div class="card-header">
+                            <span class="badge bg-primary category-badge">${event.CategoryName || 'Uncategorized'}</span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${event.EventName}</h5>
+                            <p class="card-text">${event.EventDescription || 'No description provided'}</p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar-event"></i> ${formattedDate}
+                                </small>
+                            </p>
+                            <p class="card-text">
+                                <strong>Registration Fee:</strong> $${parseFloat(event.RegistrationFee || 0).toFixed(2)}
+                            </p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    onclick="showEventDetails(${event.EventID})">
+                                <i class="bi bi-info-circle"></i> Details
+                            </button>
+                            <button class="btn btn-register btn-sm text-white" 
+                                    onclick="navigateToRegistration(${event.EventID})">
+                                <i class="bi bi-pencil-square"></i> Register
+                            </button>
+                        </div>
+                    </div>
+                `;
+                eventsContainer.appendChild(card);
+            });
+        }
+
+        // Show event details
+        window.showEventDetails = function(eventId) {
+            const event = allEvents.find(e => e.EventID === eventId);
+            if (!event) return;
+            
+            currentEvent = event;
+            
+            const eventDate = new Date(event.EventDateTime);
+            const dateOptions = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            const formattedDate = eventDate.toLocaleDateString('en-US', dateOptions);
+            
+            const detailsContent = document.getElementById('eventDetailsContent');
+            detailsContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h3>${event.EventName}</h3>
+                        <span class="badge bg-primary mb-3">${event.CategoryName || 'Uncategorized'}</span>
+                        <p>${event.EventDescription || 'No description provided'}</p>
+                        
+                        <h5 class="mt-4">Event Rules</h5>
+                        <p>${event.Rules || 'No specific rules provided'}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Event Details</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <i class="bi bi-calendar-event"></i> ${formattedDate}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="bi bi-cash"></i> Registration Fee: $${parseFloat(event.RegistrationFee || 0).toFixed(2)}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="bi bi-people"></i> Max Participants: ${event.MaxParticipants || 'Unlimited'}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('showRegistrationModal').addEventListener('click', () => {
+                eventDetailsModal.hide();
+                navigateToRegistration(currentEvent.EventID);
+            });
+            
+            eventDetailsModal.show();
+        };
+
+        // Navigate to registration page
+        window.navigateToRegistration = function(eventId) {
+            window.location.href = `/event_registration.html?id=${eventId}`;
+        };
+
+        // Show registration form (older method, now redirects to new page)
+        window.showRegistrationForm = function(eventId) {
+            // Navigate to the new registration page
+            window.location.href = `/event_registration.html?id=${eventId}`;
+        };
+
+        // Event listener for team/individual selection
+        teamSelect.addEventListener('change', function() {
+            if (this.value === 'team') {
+                teamIdGroup.classList.remove('d-none');
+                document.getElementById('teamId').setAttribute('required', '');
+            } else {
+                teamIdGroup.classList.add('d-none');
+                document.getElementById('teamId').removeAttribute('required');
+            }
+        });
+
+        // Event listener for registration submission
+        document.getElementById('submitRegistration').addEventListener('click', function() {
+            const eventId = document.getElementById('eventId').value;
+            const registrationType = teamSelect.value;
+            const teamId = registrationType === 'team' ? document.getElementById('teamId').value : null;
+            
+            // Validate team ID if team registration
+            if (registrationType === 'team' && (!teamId || teamId <= 0)) {
+                alert('Please enter a valid team ID');
+                return;
+            }
+            
+            // Create registration payload
+            const registrationData = {
+                EventID: parseInt(eventId),
+                TeamID: teamId ? parseInt(teamId) : null
+            };
+            
+            // Submit registration
+            fetch('/event-register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registrationData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || 'Registration failed'); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Registration successful!');
+                registrationModal.hide();
+            })
+            .catch(error => {
+                alert(error.message || 'Registration failed. Please try again.');
+                console.error('Registration error:', error);
+            });
+        });
+
+        // Search and filter events
+        searchInput.addEventListener('input', filterEvents);
+        categoryFilter.addEventListener('change', filterEvents);
+        document.getElementById('searchButton').addEventListener('click', filterEvents);
+
+        function filterEvents() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const categoryId = categoryFilter.value;
+            
+            // Always fetch events based on current categoryId, even when empty
+            // (empty categoryId means "All Categories")
+            fetchEvents(categoryId);
+            
+            // Then apply search filter locally
+            if (searchTerm) {
+                setTimeout(() => {
+                    const searchFiltered = allEvents.filter(event => 
+                        event.EventName.toLowerCase().includes(searchTerm) || 
+                        (event.EventDescription && event.EventDescription.toLowerCase().includes(searchTerm)));
+                    displayEvents(searchFiltered);
+                }, 300); // Short delay to ensure events are loaded first
+            }
+        }
+
+        // Show alert message
+        function showAlert(message) {
+            eventAlert.textContent = message;
+            eventAlert.classList.remove('d-none');
+            eventsContainer.innerHTML = '';
+        }
+    </script>
+</body>
+</html> 

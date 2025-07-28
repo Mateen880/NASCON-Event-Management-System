@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor Management - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="eventsLink" style="display: none;" href="/event_management.html">Events</a>
+                    </li>
+                    <li class="nav-item dropdown" id="managementDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Management
+                        </a>
+                        <ul class="dropdown-menu" id="managementMenu">
+                            <li><a class="dropdown-item" href="/accommodation_management.html">Accommodation</a></li>
+                            <li><a class="dropdown-item" href="/admin/rooms.html">Rooms</a></li>
+                            <li><a class="dropdown-item" href="/checkin_management.html">Check-ins</a></li>
+                            <li><a class="dropdown-item" href="/admin/judge_assignment.html">Judge Assignment</a></li>
+                            <li><a class="dropdown-item" href="/admin/evaluation.html">Evaluations</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown" id="adminDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/user_management.html">User Management</a></li>
+                            <li><a class="dropdown-item" href="/admin/role_requests.html">Role Requests</a></li>
+                            <li><a class="dropdown-item active" href="/sponsor_management.html">Sponsors</a></li>
+                            <li><a class="dropdown-item" href="/admin/sponsorship_packages.html">Sponsorship Packages</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item" id="sponsorNavItem" style="display: none;">
+                        <a class="nav-link active" href="/sponsor_management.html">Manage Sponsorship</a>
+                    </li>
+                    <li class="nav-item" id="contractsNavItem" style="display: none;">
+                        <a class="nav-link" href="/sponsor_contracts.html">My Contracts</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutButton">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="alertContainer" class="mb-4"></div>
+        
+        <!-- Admin Section -->
+        <div id="adminSection" class="mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Sponsor Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="searchSponsor" placeholder="Search sponsors..." onkeyup="filterSponsors()">
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" onclick="openAddSponsorModal()">
+                                <i class="bi bi-plus-circle"></i> Add Sponsor
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Sponsor ID</th>
+                                    <th>Company Name</th>
+                                    <th>Contact Person</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sponsorTableBody">
+                                <!-- Sponsors will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sponsor Profile Section -->
+        <div id="sponsorProfileSection" class="mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Your Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form id="sponsorProfileForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="companyName" class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="companyName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="contactPerson" class="form-label">Contact Person</label>
+                                <input type="text" class="form-control" id="contactPerson" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="companyDescription" class="form-label">Company Description</label>
+                                <textarea class="form-control" id="companyDescription" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="updateSponsorProfile()">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contract Management Section -->
+        <div id="contractSection" class="mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Contract Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Contract ID</th>
+                                    <th>Package</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contractTableBody">
+                                <!-- Contracts will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Sponsor Modal -->
+    <div class="modal fade" id="addSponsorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Sponsor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addSponsorForm">
+                        <div class="mb-3">
+                            <label for="newCompanyName" class="form-label">Company Name</label>
+                            <input type="text" class="form-control" id="newCompanyName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newContactPerson" class="form-label">Contact Person</label>
+                            <input type="text" class="form-control" id="newContactPerson" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="newEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="newPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPackage" class="form-label">Sponsorship Package</label>
+                            <select class="form-select" id="newPackage" required>
+                                <option value="">Select a package...</option>
+                                <!-- Package options will be populated here -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newCompanyDescription" class="form-label">Company Description</label>
+                            <textarea class="form-control" id="newCompanyDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addSponsor()">Add Sponsor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Contract Modal -->
+    <div class="modal fade" id="viewContractModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Contract Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="contractDetails">
+                        <!-- Contract details will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="approveContractBtn" style="display: none;">Approve Contract</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Sponsor Modal -->
+    <div class="modal fade" id="viewSponsorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sponsor Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="sponsorDetails">
+                        <!-- Sponsor details will be populated here -->
+                    </div>
+                    <div id="contractsSection" class="mt-4">
+                        <h5>Active Contracts</h5>
+                        <div id="sponsorContracts">
+                            <!-- Contracts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUserRole = null;
+        let currentSponsorId = null;
+        let allSponsors = [];
+        
+        // Bootstrap Modal Instances
+        let viewSponsorModal;
+
+        // Check user role and show appropriate sections
+        async function checkUserRole() {
+            try {
+                const response = await fetch('/getRole');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user role');
+                }
+                const data = await response.json();
+                currentUserRole = data.role;
+                
+                // Show/hide sections based on role
+                document.getElementById('adminSection').style.display = 
+                    currentUserRole === 'Admin' ? 'block' : 'none';
+                document.getElementById('sponsorProfileSection').style.display = 
+                    currentUserRole === 'Sponsor' ? 'block' : 'none';
+                document.getElementById('contractSection').style.display = 
+                    currentUserRole === 'Sponsor' ? 'block' : 'none';
+                
+                // Update navigation based on role
+                updateNavigation(currentUserRole);
+
+                if (currentUserRole === 'Sponsor') {
+                    loadSponsorProfile();
+                    loadContracts();
+                } else if (currentUserRole === 'Admin') {
+                    loadSponsors();
+                } else {
+                    // If not Admin or Sponsor, redirect to homepage
+                    window.location.href = '/homepage.html';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load user role');
+            }
+        }
+        
+        // Function to update navigation based on user role
+        function updateNavigation(role) {
+            // Get navigation elements
+            const eventsLink = document.querySelector('a[href="/event_management.html"]').parentElement;
+            const managementDropdown = document.querySelector('a.dropdown-toggle[href="#"]').closest('.dropdown');
+            const adminDropdown = document.querySelector('a.dropdown-toggle.active[href="#"]').closest('.dropdown');
+            
+            // Hide all by default
+            eventsLink.style.display = 'none';
+            managementDropdown.style.display = 'none';
+            adminDropdown.style.display = 'none';
+            
+            // Show based on role
+            if (role === 'Admin') {
+                eventsLink.style.display = '';
+                managementDropdown.style.display = '';
+                adminDropdown.style.display = '';
+            } else if (role === 'Sponsor') {
+                // Sponsor only sees specific navigation
+                // Add sponsor-specific navigation if not present
+                const navbarNav = document.querySelector('.navbar-nav');
+                
+                if (!document.getElementById('sponsorContractsLink')) {
+                    const contractsItem = document.createElement('li');
+                    contractsItem.className = 'nav-item';
+                    contractsItem.innerHTML = '<a class="nav-link" href="/sponsor_contracts.html" id="sponsorContractsLink">My Contracts</a>';
+                    navbarNav.appendChild(contractsItem);
+                }
+            } else if (role === 'Event Organizer') {
+                eventsLink.style.display = '';
+                managementDropdown.style.display = '';
+            }
+        }
+
+        // Initialize Bootstrap modals when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            viewSponsorModal = new bootstrap.Modal(document.getElementById('viewSponsorModal'));
+            checkUserRole();
+        });
+
+        // Load sponsors for admin
+        async function loadSponsors() {
+            try {
+                const response = await fetch('/api/sponsors');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch sponsors');
+                }
+                const sponsors = await response.json();
+                allSponsors = sponsors;
+                const tbody = document.getElementById('sponsorTableBody');
+                tbody.innerHTML = '';
+
+                sponsors.forEach(sponsor => {
+                    const row = document.createElement('tr');
+                    const statusClass = sponsor.Status === 'Active' ? 'text-success' : 'text-secondary';
+                    
+                    row.innerHTML = `
+                        <td>${sponsor.SponsorID}</td>
+                        <td>${sponsor.CompanyName}</td>
+                        <td>${sponsor.ContactPerson}</td>
+                        <td>${sponsor.Email}</td>
+                        <td>${sponsor.Phone || 'N/A'}</td>
+                        <td><span class="${statusClass}">${sponsor.Status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info me-1" onclick="viewSponsor(${sponsor.SponsorID})">
+                                <i class="bi bi-eye"></i> View
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSponsor(${sponsor.SponsorID})">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load sponsors: ' + error.message);
+            }
+        }
+
+        // Function to filter sponsors by search
+        function filterSponsors() {
+            const searchTerm = document.getElementById('searchSponsor').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displaySponsors(allSponsors);
+                return;
+            }
+            
+            const filteredSponsors = allSponsors.filter(sponsor => 
+                sponsor.CompanyName.toLowerCase().includes(searchTerm) ||
+                sponsor.ContactPerson.toLowerCase().includes(searchTerm) ||
+                (sponsor.Email && sponsor.Email.toLowerCase().includes(searchTerm))
+            );
+            
+            displaySponsors(filteredSponsors);
+        }
+
+        // Function to display sponsors in the table
+        function displaySponsors(sponsors) {
+            const tbody = document.getElementById('sponsorTableBody');
+            tbody.innerHTML = '';
+
+            if (!sponsors || sponsors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No sponsors found</td></tr>';
+                return;
+            }
+            
+            sponsors.forEach(sponsor => {
+                const row = document.createElement('tr');
+                const statusClass = sponsor.Status === 'Active' ? 'text-success' : 'text-secondary';
+                
+                row.innerHTML = `
+                    <td>${sponsor.SponsorID}</td>
+                    <td>${sponsor.CompanyName}</td>
+                    <td>${sponsor.ContactPerson}</td>
+                    <td>${sponsor.Email}</td>
+                    <td>${sponsor.Phone || 'N/A'}</td>
+                    <td><span class="${statusClass}">${sponsor.Status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-1" onclick="viewSponsor(${sponsor.SponsorID})">
+                            <i class="bi bi-eye"></i> View
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSponsor(${sponsor.SponsorID})">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Function to view sponsor details
+        async function viewSponsor(sponsorId) {
+            try {
+                // Fetch sponsor details
+                const sponsorResponse = await fetch(`/api/sponsors/${sponsorId}`);
+                if (!sponsorResponse.ok) {
+                    throw new Error('Failed to fetch sponsor details');
+                }
+                
+                const sponsor = await sponsorResponse.json();
+                
+                // Fetch contracts for this sponsor
+                const contractsResponse = await fetch(`/api/admin/sponsorship-contracts`);
+                if (!contractsResponse.ok) {
+                    throw new Error('Failed to fetch contracts');
+                }
+                
+                const allContracts = await contractsResponse.json();
+                const sponsorContracts = allContracts.filter(contract => contract.SponsorID === sponsor.SponsorID);
+                
+                // Update sponsor details section
+                const detailsSection = document.getElementById('sponsorDetails');
+                detailsSection.innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Company Name:</strong> ${sponsor.CompanyName}</p>
+                            <p><strong>Contact Person:</strong> ${sponsor.ContactPerson}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> ${sponsor.Email}</p>
+                            <p><strong>Phone:</strong> ${sponsor.Phone || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Update contracts section
+                const contractsSection = document.getElementById('sponsorContracts');
+                if (sponsorContracts.length === 0) {
+                    contractsSection.innerHTML = '<p>No active contracts found for this sponsor.</p>';
+                } else {
+                    let contractsHtml = '<div class="table-responsive"><table class="table table-sm">';
+                    contractsHtml += `
+                        <thead>
+                            <tr>
+                                <th>Contract ID</th>
+                                <th>Package</th>
+                                <th>Cost</th>
+                                <th>Status</th>
+                                <th>Payment Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    `;
+                    
+                    sponsorContracts.forEach(contract => {
+                        const contractStatusClass = contract.ContractStatus === 'Signed' ? 'text-success' : 
+                                                    contract.ContractStatus === 'Expired' ? 'text-danger' : 'text-warning';
+                        
+                        const paymentStatusClass = contract.PaymentStatus === 'Paid' ? 'text-success' : 
+                                                  contract.PaymentStatus === 'Overdue' ? 'text-danger' : 'text-warning';
+                        
+                        contractsHtml += `
+                            <tr>
+                                <td>${contract.ContractID}</td>
+                                <td>${contract.PackageName}</td>
+                                <td>Rs. ${parseFloat(contract.PackageCost).toLocaleString()}</td>
+                                <td><span class="${contractStatusClass}">${contract.ContractStatus}</span></td>
+                                <td><span class="${paymentStatusClass}">${contract.PaymentStatus}</span></td>
+                                <td>${new Date(contract.ContractDate).toLocaleDateString()}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    contractsHtml += '</tbody></table></div>';
+                    contractsSection.innerHTML = contractsHtml;
+                }
+                
+                // Show the modal
+                viewSponsorModal.show();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // Load sponsor profile for logged-in sponsor
+        async function loadSponsorProfile() {
+            try {
+                const response = await fetch('/api/sponsor-profile');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile');
+                }
+                const profile = await response.json();
+                
+                document.getElementById('companyName').value = profile.CompanyName;
+                document.getElementById('contactPerson').value = profile.ContactPerson;
+                document.getElementById('email').value = profile.Email;
+                document.getElementById('phone').value = profile.Phone || '';
+                document.getElementById('companyDescription').value = '';
+                
+                currentSponsorId = profile.SponsorID;
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load profile: ' + error.message);
+            }
+        }
+
+        // Load contracts for logged-in sponsor
+        async function loadContracts() {
+            try {
+                const response = await fetch('/api/sponsor/contracts');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch contracts');
+                }
+                const contracts = await response.json();
+                
+                const tbody = document.getElementById('contractTableBody');
+                tbody.innerHTML = '';
+                
+                if (contracts.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No contracts found</td></tr>';
+                    return;
+                }
+                
+                contracts.forEach(contract => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${contract.ContractID}</td>
+                        <td>${contract.PackageName}</td>
+                        <td>Rs. ${parseFloat(contract.PackageCost).toLocaleString()}</td>
+                        <td>${contract.ContractStatus}</td>
+                        <td>${new Date(contract.StartDate || contract.ContractDate).toLocaleDateString()}</td>
+                        <td>${contract.EndDate ? new Date(contract.EndDate).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary me-1" onclick="viewContract(${contract.ContractID})">
+                                <i class="bi bi-eye"></i> View
+                            </button>
+                            ${contract.PaymentStatus === 'Pending' ? 
+                            `<button class="btn btn-sm btn-success" onclick="makePayment(${contract.ContractID})">
+                                <i class="bi bi-credit-card"></i> Pay
+                            </button>` : ''}
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', 'Failed to load contracts: ' + error.message);
+            }
+        }
+        
+        // Function to delete a sponsor
+        async function deleteSponsor(sponsorId) {
+            if (!confirm('Are you sure you want to delete this sponsor?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/sponsors/${sponsorId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Failed to delete sponsor');
+                }
+                
+                const data = await response.json();
+                showAlert('success', data.message);
+                loadSponsors();
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // Function to open add sponsor modal
+        function openAddSponsorModal() {
+            document.getElementById('addSponsorForm').reset();
+            loadSponsorshipPackages();
+            const addSponsorModal = new bootstrap.Modal(document.getElementById('addSponsorModal'));
+            addSponsorModal.show();
+        }
+
+        // Function to load sponsorship packages
+        async function loadSponsorshipPackages() {
+            try {
+                const response = await fetch('/api/sponsorship-packages');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch sponsorship packages');
+                }
+                
+                const packages = await response.json();
+                const packageSelect = document.getElementById('newPackage');
+                
+                // Log the package data for debugging
+                console.log('Loaded packages:', packages);
+                
+                // Clear existing options except the first one (our placeholder)
+                while (packageSelect.options.length > 1) {
+                    packageSelect.remove(1);
+                }
+                
+                // Populate package options
+                if (packages && packages.length > 0) {
+                    packages.forEach(pkg => {
+                        const option = document.createElement('option');
+                        option.value = pkg.PackageID;
+                        option.textContent = `${pkg.PackageName} - Rs. ${parseFloat(pkg.PackageCost).toLocaleString()}`;
+                        packageSelect.appendChild(option);
+                    });
+                    console.log(`Added ${packages.length} package options to dropdown`);
+                    
+                    // Inspect the select element after population
+                    console.log('Package select options:', Array.from(packageSelect.options).map(o => ({value: o.value, text: o.text})));
+                } else {
+                    console.warn('No packages received from the server');
+                    showAlert('warning', 'No sponsorship packages available. Please create packages first.');
+                }
+            } catch (error) {
+                console.error('Error loading sponsorship packages:', error);
+                showAlert('danger', 'Failed to load sponsorship packages: ' + error.message);
+            }
+        }
+
+        // Function to add a new sponsor
+        async function addSponsor() {
+            const companyName = document.getElementById('newCompanyName').value.trim();
+            const contactPerson = document.getElementById('newContactPerson').value.trim();
+            const email = document.getElementById('newEmail').value.trim();
+            const phone = document.getElementById('newPhone').value.trim();
+            const packageId = document.getElementById('newPackage').value;
+            const description = document.getElementById('newCompanyDescription').value.trim();
+            
+            // Log values for debugging
+            console.log('Form values:', { companyName, contactPerson, email, phone, packageId, description });
+            
+            if (!companyName || !contactPerson || !email || !packageId) {
+                if (!packageId) {
+                    showAlert('danger', 'Please select a sponsorship package');
+                } else {
+                    showAlert('danger', 'Please fill all required fields');
+                }
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/sponsors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        companyName,
+                        contactPerson,
+                        email,
+                        phone,
+                        packageId
+                    })
+                });
+                
+                // Log the raw response for debugging
+                console.log('Server response status:', response.status);
+                
+                const data = await response.json();
+                console.log('Server response data:', data);
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to add sponsor');
+                }
+                
+                let successMessage = 'Sponsor added successfully';
+                if (data.tempPassword) {
+                    successMessage += `. Temporary password for sponsor user: ${data.tempPassword}`;
+                }
+                
+                showAlert('success', successMessage);
+                document.getElementById('addSponsorForm').reset();
+                const addSponsorModal = bootstrap.Modal.getInstance(document.getElementById('addSponsorModal'));
+                addSponsorModal.hide();
+                loadSponsors();
+            } catch (error) {
+                console.error('Error adding sponsor:', error);
+                showAlert('danger', error.message);
+            }
+        }
+
+        // Function to show alert messages
+        function showAlert(type, message) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alertHtml;
+            
+            // Auto-dismiss after longer time if message contains password
+            const timeout = message.includes('password') ? 30000 : 5000;
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            }, timeout);
+        }
+
+        // Add logout functionality if it doesn't exist
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('logoutButton').addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch('/logout', { method: 'POST' });
+                    if (response.ok) {
+                        window.location.href = '/login.html';
+                    } else {
+                        showAlert('danger', 'Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Logout failed');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

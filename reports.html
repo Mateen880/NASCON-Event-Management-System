@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/reports.html">Reports</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- Report Type Selection -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Generate Report</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <select class="form-select" id="reportType">
+                            <option value="">Select Report Type</option>
+                            <option value="event">Event Participation Statistics</option>
+                            <option value="venue">Venue Utilization Reports</option>
+                            <option value="financial">Revenue & Sponsorship Reports</option>
+                            <option value="accommodation">Accommodation Occupancy Reports</option>
+                            <option value="participant">Participant Demographics</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <i class="bi bi-file-earmark-text"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Display Area -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Report Results</h5>
+            </div>
+            <div class="card-body">
+                <!-- Event Report Section -->
+                <div id="eventReport" class="report-section d-none">
+                    <h6 class="mb-3">Event Statistics</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="eventChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Event</th>
+                                            <th>Participants</th>
+                                            <th>Revenue</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="eventReportTable">
+                                        <!-- Event data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Venue Utilization Report Section -->
+                <div id="venueReport" class="report-section d-none">
+                    <h6 class="mb-3">Venue Utilization</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="venueChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Venue</th>
+                                            <th>Capacity</th>
+                                            <th>Events</th>
+                                            <th>Hours Booked</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="venueReportTable">
+                                        <!-- Venue data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="mt-4 mb-3">Venue Booking Details</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Venue</th>
+                                    <th>Event</th>
+                                    <th>Round</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Duration (hrs)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="venueBookingsTable">
+                                <!-- Booking data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Financial Report Section -->
+                <div id="financialReport" class="report-section d-none">
+                    <h6 class="mb-3">Financial Overview</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Amount</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="financialReportTable">
+                                        <!-- Financial data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participant Report Section -->
+                <div id="participantReport" class="report-section d-none">
+                    <h6 class="mb-3">Participant Statistics</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="participantChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>University</th>
+                                            <th>Participants</th>
+                                            <th>Events</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="participantReportTable">
+                                        <!-- Participant data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sponsor Report Section -->
+                <div id="sponsorReport" class="report-section d-none">
+                    <h6 class="mb-3">Sponsor Statistics</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <canvas id="sponsorChart"></canvas>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Sponsor</th>
+                                            <th>Package</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sponsorReportTable">
+                                        <!-- Sponsor data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accommodation Occupancy Report Section -->
+                <div id="accommodationReport" class="report-section d-none">
+                    <h6 class="mb-3">Accommodation Summary</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <canvas id="accommodationChart"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Occupancy Overview</h5>
+                                    <div id="accommodationSummary">
+                                        <!-- Summary data will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="mt-4 mb-3">Room Details</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Room Number</th>
+                                    <th>Capacity</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th>Check-In</th>
+                                    <th>Check-Out</th>
+                                    <th>Occupants</th>
+                                    <th>Guest</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roomDetailsTable">
+                                <!-- Room data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <h6 class="mt-4 mb-3">Check-in Trend</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="checkinTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let eventChart, financialChart, participantChart, sponsorChart, venueChart, accommodationChart, checkinTrendChart;
+
+        // Generate report based on selected type and date range
+        async function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+
+            if (!reportType) {
+                alert('Please select a report type');
+                return;
+            }
+
+            // Hide all report sections
+            document.querySelectorAll('.report-section').forEach(section => {
+                section.classList.add('d-none');
+            });
+
+            try {
+                const response = await fetch(`/api/reports/${reportType}`);
+                if (!response.ok) {
+                    throw new Error('Failed to generate report');
+                }
+                const data = await response.json();
+
+                // Show and populate the selected report section
+                const reportSection = document.getElementById(`${reportType}Report`);
+                reportSection.classList.remove('d-none');
+
+                switch (reportType) {
+                    case 'event':
+                        populateEventReport(data);
+                        break;
+                    case 'financial':
+                        populateFinancialReport(data);
+                        break;
+                    case 'participant':
+                        populateParticipantReport(data);
+                        break;
+                    case 'sponsor':
+                        populateSponsorReport(data);
+                        break;
+                    case 'venue':
+                        populateVenueReport(data);
+                        break;
+                    case 'accommodation':
+                        populateAccommodationReport(data);
+                        break;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate report');
+            }
+        }
+
+        // Populate event report
+        function populateEventReport(data) {
+            // Update table
+            const tbody = document.getElementById('eventReportTable');
+            tbody.innerHTML = '';
+            
+            if (!data.events || data.events.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No event data available</td></tr>';
+            } else {
+                data.events.forEach(event => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${event.EventName || 'Unknown'}</td>
+                        <td>${event.ParticipantCount || 0}</td>
+                        <td>$${parseFloat(event.Revenue || 0).toFixed(2)}</td>
+                        <td>${event.Status || 'Unknown'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update chart
+            if (eventChart) {
+                eventChart.destroy();
+            }
+            const ctx = document.getElementById('eventChart').getContext('2d');
+            eventChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.events && data.events.length > 0 
+                        ? data.events.map(e => e.EventName || 'Unknown')
+                        : ['No Data'],
+                    datasets: [{
+                        label: 'Participants',
+                        data: data.events && data.events.length > 0 
+                            ? data.events.map(e => e.ParticipantCount || 0)
+                            : [0],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Event Participation'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate financial report
+        function populateFinancialReport(data) {
+            // Update table
+            const tbody = document.getElementById('financialReportTable');
+            tbody.innerHTML = '';
+            
+            if (!data.categories || data.categories.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center">No financial data available</td></tr>';
+            } else {
+                data.categories.forEach(category => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${category.Category || 'Unknown'}</td>
+                        <td>$${parseFloat(category.Amount || 0).toFixed(2)}</td>
+                        <td>${parseFloat(category.Percentage || 0).toFixed(1)}%</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update chart
+            if (financialChart) {
+                financialChart.destroy();
+            }
+            const ctx = document.getElementById('financialChart').getContext('2d');
+            financialChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.categories && data.categories.length > 0 
+                        ? data.categories.map(c => c.Category || 'Unknown')
+                        : ['No Data'],
+                    datasets: [{
+                        data: data.categories && data.categories.length > 0 
+                            ? data.categories.map(c => parseFloat(c.Amount) || 0)
+                            : [0],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Financial Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate participant report
+        function populateParticipantReport(data) {
+            // Update table
+            const tbody = document.getElementById('participantReportTable');
+            tbody.innerHTML = '';
+            
+            if (!data.universities || data.universities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center">No participant data available</td></tr>';
+            } else {
+                data.universities.forEach(university => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${university.University || 'Unknown'}</td>
+                        <td>${university.ParticipantCount || 0}</td>
+                        <td>${university.EventCount || 0}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update chart
+            if (participantChart) {
+                participantChart.destroy();
+            }
+            const ctx = document.getElementById('participantChart').getContext('2d');
+            participantChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.universities && data.universities.length > 0 
+                        ? data.universities.map(u => u.University || 'Unknown')
+                        : ['No Data'],
+                    datasets: [{
+                        label: 'Participants',
+                        data: data.universities && data.universities.length > 0 
+                            ? data.universities.map(u => u.ParticipantCount || 0)
+                            : [0],
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'University Participation'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate sponsor report
+        function populateSponsorReport(data) {
+            // Update table
+            const tbody = document.getElementById('sponsorReportTable');
+            tbody.innerHTML = '';
+            data.sponsors.forEach(sponsor => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${sponsor.CompanyName}</td>
+                    <td>${sponsor.PackageName}</td>
+                    <td>$${sponsor.Amount.toFixed(2)}</td>
+                    <td>${sponsor.Status}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update chart
+            if (sponsorChart) {
+                sponsorChart.destroy();
+            }
+            const ctx = document.getElementById('sponsorChart').getContext('2d');
+            sponsorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.sponsors.map(s => s.CompanyName),
+                    datasets: [{
+                        label: 'Sponsorship Amount',
+                        data: data.sponsors.map(s => s.Amount),
+                        backgroundColor: 'rgba(255, 159, 64, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Sponsorship Contributions'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate venue utilization report
+        function populateVenueReport(data) {
+            // Update venues table
+            const tbody = document.getElementById('venueReportTable');
+            tbody.innerHTML = '';
+            
+            if (!data.venues || data.venues.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center">No venue data available</td></tr>';
+            } else {
+                data.venues.forEach(venue => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${venue.VenueName || 'Unknown'}</td>
+                        <td>${venue.Capacity || 0}</td>
+                        <td>${venue.UniqueEvents || 0} (${venue.EventCount || 0} sessions)</td>
+                        <td>${venue.TotalHoursBooked ? parseFloat(venue.TotalHoursBooked).toFixed(1) : 0}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update bookings table
+            const bookingsBody = document.getElementById('venueBookingsTable');
+            bookingsBody.innerHTML = '';
+            
+            if (!data.bookings || data.bookings.length === 0) {
+                bookingsBody.innerHTML = '<tr><td colspan="6" class="text-center">No booking data available</td></tr>';
+            } else {
+                data.bookings.forEach(booking => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${booking.VenueName || 'Unknown'}</td>
+                        <td>${booking.EventName || 'Unknown'}</td>
+                        <td>${booking.RoundName || 'Unknown'}</td>
+                        <td>${booking.ScheduleDate ? new Date(booking.ScheduleDate).toLocaleDateString() : 'Unknown'}</td>
+                        <td>${booking.StartTime ? booking.StartTime.substring(0, 5) : '00:00'} - ${booking.EndTime ? booking.EndTime.substring(0, 5) : '00:00'}</td>
+                        <td>${booking.HoursBooked ? parseFloat(booking.HoursBooked).toFixed(1) : 0}</td>
+                    `;
+                    bookingsBody.appendChild(row);
+                });
+            }
+
+            // Update chart
+            if (venueChart) {
+                venueChart.destroy();
+            }
+            const ctx = document.getElementById('venueChart').getContext('2d');
+            venueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.venues.map(v => v.VenueName || 'Unknown'),
+                    datasets: [{
+                        label: 'Hours Booked',
+                        data: data.venues.map(v => parseFloat(v.TotalHoursBooked) || 0),
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Venue Utilization (Hours)'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate accommodation occupancy report
+        function populateAccommodationReport(data) {
+            // Update summary section
+            const summary = data.summary || {
+                TotalRooms: 0,
+                OccupiedRooms: 0,
+                AvailableRooms: 0,
+                OccupancyRate: 0,
+                TotalCapacity: 0,
+                CurrentOccupants: 0
+            };
+            
+            const summaryEl = document.getElementById('accommodationSummary');
+            summaryEl.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Total Rooms:</span>
+                    <strong>${summary.TotalRooms || 0}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Occupied Rooms:</span>
+                    <strong>${summary.OccupiedRooms || 0}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Available Rooms:</span>
+                    <strong>${summary.AvailableRooms || 0}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Occupancy Rate:</span>
+                    <strong>${parseFloat(summary.OccupancyRate || 0).toFixed(1)}%</strong>
+                </div>
+            `;
+
+            // Update room details table
+            const roomsBody = document.getElementById('roomDetailsTable');
+            roomsBody.innerHTML = '';
+            
+            if (!data.roomDetails || data.roomDetails.length === 0) {
+                roomsBody.innerHTML = '<tr><td colspan="8" class="text-center">No room data available</td></tr>';
+            } else {
+                data.roomDetails.forEach(room => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${room.RoomNumber || '-'}</td>
+                        <td>${room.Capacity || 0}</td>
+                        <td>$${parseFloat(room.Price || 0).toFixed(2)}</td>
+                        <td><span class="badge bg-${room.AvailabilityStatus === 'Occupied' ? 'danger' : 'success'}">${room.AvailabilityStatus || 'Unknown'}</span></td>
+                        <td>${room.CheckInDate ? new Date(room.CheckInDate).toLocaleDateString() : '-'}</td>
+                        <td>${room.CheckOutDate ? new Date(room.CheckOutDate).toLocaleDateString() : '-'}</td>
+                        <td>${room.NumberOfPeople || 0}</td>
+                        <td>${room.ParticipantName || '-'}</td>
+                    `;
+                    roomsBody.appendChild(row);
+                });
+            }
+
+            // Update occupancy chart
+            if (accommodationChart) {
+                accommodationChart.destroy();
+            }
+            const ctx = document.getElementById('accommodationChart').getContext('2d');
+            accommodationChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Occupied', 'Available'],
+                    datasets: [{
+                        data: [summary.OccupiedRooms || 0, summary.AvailableRooms || 0],
+                        backgroundColor: ['rgba(255, 99, 132, 0.5)', 'rgba(54, 162, 235, 0.5)']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Room Occupancy Status'
+                        }
+                    }
+                }
+            });
+
+            // Update check-in trend chart - handle empty data
+            if (checkinTrendChart) {
+                checkinTrendChart.destroy();
+            }
+            const trendCtx = document.getElementById('checkinTrendChart').getContext('2d');
+            checkinTrendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: data.checkinStats && data.checkinStats.length > 0 
+                        ? data.checkinStats.map(stat => new Date(stat.CheckinDate).toLocaleDateString())
+                        : ['No Data'],
+                    datasets: [{
+                        label: 'Check-ins',
+                        data: data.checkinStats && data.checkinStats.length > 0 
+                            ? data.checkinStats.map(stat => stat.CheckinCount)
+                            : [0],
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Check-in Trend'
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venue Management - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/event_management.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/venue_management.html">Venues</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Venue Management</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createVenueModal">
+                <i class="bi bi-plus-circle"></i> Add Venue
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Venue ID</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="venuesTableBody">
+                    <!-- Venues will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create Venue Modal -->
+    <div class="modal fade" id="createVenueModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Venue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createVenueForm">
+                        <div class="mb-3">
+                            <label for="venueName" class="form-label">Venue Name</label>
+                            <input type="text" class="form-control" id="venueName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="capacity" class="form-label">Capacity</label>
+                            <input type="number" class="form-control" id="capacity" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" required>
+                                <option value="Available">Available</option>
+                                <option value="Booked">Booked</option>
+                                <option value="Under Maintenance">Under Maintenance</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createVenue()">Add Venue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Venue Modal -->
+    <div class="modal fade" id="scheduleVenueModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Venue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleVenueForm">
+                        <input type="hidden" id="scheduleVenueId">
+                        <div class="mb-3">
+                            <label for="scheduleDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="scheduleDate" required onchange="loadAvailableTimeSlots()">
+                        </div>
+                        <div class="mb-3">
+                            <label for="availableTimeSlots" class="form-label">Available Time Slots</label>
+                            <select class="form-select" id="availableTimeSlots" onchange="setSelectedTimeSlot()">
+                                <option value="">Select a time slot...</option>
+                            </select>
+                            <small class="text-muted">Or manually set times below</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="startTime" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="startTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="endTime" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="endTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventRound" class="form-label">Event Round</label>
+                            <select class="form-select" id="eventRound" required>
+                                <option value="">Select event round...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="scheduleVenue()">Schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View Schedules Modal -->
+    <div class="modal fade" id="viewSchedulesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Venue Schedules</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Event</th>
+                                    <th>Round</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedulesTableBody">
+                                <!-- Schedules will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="noSchedulesMessage" class="text-center p-3 d-none">
+                        <p>No schedules found for this venue.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variable to store available time slots for reference
+        let availableTimeSlots = [];
+        
+        async function loadVenues() {
+            try {
+                const response = await fetch('/api/venues');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch venues');
+                }
+                const venues = await response.json();
+                const tbody = document.getElementById('venuesTableBody');
+                tbody.innerHTML = '';
+
+                if (venues.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="text-center">No venues found</td></tr>`;
+                    return;
+                }
+
+                venues.forEach(venue => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${venue.Venue_ID}</td>
+                        <td>${venue.VenueName}</td>
+                        <td>${venue.Location}</td>
+                        <td>${venue.Capacity}</td>
+                        <td>${venue.Status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info me-2" onclick="openViewSchedulesModal(${venue.Venue_ID})">
+                                <i class="bi bi-calendar-week"></i>
+                            </button>
+                            <button class="btn btn-sm btn-primary me-2" onclick="openScheduleModal(${venue.Venue_ID})">
+                                <i class="bi bi-calendar-plus"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteVenue(${venue.Venue_ID})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load venues');
+            }
+        }
+
+        async function loadEventRounds() {
+            try {
+                const response = await fetch('/api/event-rounds');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch event rounds');
+                }
+                const rounds = await response.json();
+                const select = document.getElementById('eventRound');
+                select.innerHTML = '<option value="">Select event round...</option>';
+                
+                rounds.forEach(round => {
+                    select.innerHTML += `<option value="${round.RoundID}">${round.EventName} - ${round.RoundName}</option>`;
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load event rounds');
+            }
+        }
+
+        function openScheduleModal(venueId) {
+            document.getElementById('scheduleVenueId').value = venueId;
+            document.getElementById('scheduleVenueForm').reset();
+            document.getElementById('availableTimeSlots').innerHTML = '<option value="">Select a time slot...</option>';
+            
+            // Reset availableTimeSlots array
+            availableTimeSlots = [];
+            
+            new bootstrap.Modal(document.getElementById('scheduleVenueModal')).show();
+        }
+
+        async function openViewSchedulesModal(venueId) {
+            try {
+                // Store the venue ID for potential operations after this modal
+                document.getElementById('scheduleVenueId').value = venueId;
+                
+                const response = await fetch(`/api/venues/${venueId}/schedules`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch venue schedules');
+                }
+                
+                const schedules = await response.json();
+                const tbody = document.getElementById('schedulesTableBody');
+                const noSchedulesMessage = document.getElementById('noSchedulesMessage');
+                
+                tbody.innerHTML = '';
+                
+                if (schedules.length === 0) {
+                    tbody.classList.add('d-none');
+                    noSchedulesMessage.classList.remove('d-none');
+                } else {
+                    tbody.classList.remove('d-none');
+                    noSchedulesMessage.classList.add('d-none');
+                    
+                    schedules.forEach(schedule => {
+                        const date = new Date(schedule.ScheduleDate).toLocaleDateString();
+                        const startTime = schedule.StartTime.substring(0, 5);
+                        const endTime = schedule.EndTime.substring(0, 5);
+                        
+                        const row = document.createElement('tr');
+                        // Add data attributes to the row for easy access during delete
+                        row.setAttribute('data-schedule-id', schedule.ScheduleID);
+                        row.setAttribute('data-venue-id', venueId);
+                        
+                        row.innerHTML = `
+                            <td>${date}</td>
+                            <td>${startTime} - ${endTime}</td>
+                            <td>${schedule.EventName}</td>
+                            <td>${schedule.RoundName}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="deleteSchedule(${schedule.ScheduleID})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+                
+                new bootstrap.Modal(document.getElementById('viewSchedulesModal')).show();
+            } catch (error) {
+                console.error('Error:', error);
+                // Make error message more specific and less alarming
+                if (error.message === 'Failed to fetch venue schedules') {
+                    console.log('No schedules found for this venue');
+                    // Show empty state instead of error
+                    const tbody = document.getElementById('schedulesTableBody');
+                    const noSchedulesMessage = document.getElementById('noSchedulesMessage');
+                    tbody.innerHTML = '';
+                    tbody.classList.add('d-none');
+                    noSchedulesMessage.classList.remove('d-none');
+                    new bootstrap.Modal(document.getElementById('viewSchedulesModal')).show();
+                } else {
+                    alert('Could not load venue schedules. Please try again.');
+                }
+            }
+        }
+
+        async function loadAvailableTimeSlots() {
+            const venueId = document.getElementById('scheduleVenueId').value;
+            const date = document.getElementById('scheduleDate').value;
+            
+            if (!date) return;
+            
+            const select = document.getElementById('availableTimeSlots');
+            // Show loading state
+            select.innerHTML = '<option value="">Loading available slots...</option>';
+            
+            // Clear the time fields
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
+            
+            // Reset availableTimeSlots array
+            availableTimeSlots = [];
+            
+            try {
+                const response = await fetch(`/api/venues/${venueId}/available-slots?date=${date}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch available time slots');
+                }
+                
+                const timeSlots = await response.json();
+                
+                // Reset and repopulate the select
+                select.innerHTML = '<option value="">Select a time slot...</option>';
+                
+                if (!timeSlots || timeSlots.length === 0) {
+                    select.innerHTML += '<option value="" disabled>No available time slots for this date</option>';
+                    console.log('No available time slots found for the selected date');
+                } else {
+                    console.log(`Found ${timeSlots.length} available time slots`);
+                    
+                    // Store in global array
+                    availableTimeSlots = timeSlots;
+                    
+                    timeSlots.forEach((slot, index) => {
+                        const startTime = slot.startTime.substring(0, 5);
+                        const endTime = slot.endTime.substring(0, 5);
+                        select.innerHTML += `<option value="${index}">${startTime} - ${endTime}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading time slots:', error);
+                select.innerHTML = '<option value="">Select a time slot...</option>';
+                select.innerHTML += '<option value="" disabled>Error loading slots - please try again</option>';
+                console.log('Could not load available time slots:', error.message);
+            }
+        }
+
+        function setSelectedTimeSlot() {
+            const select = document.getElementById('availableTimeSlots');
+            const selectedIndex = parseInt(select.value, 10);
+            
+            if (isNaN(selectedIndex) || !availableTimeSlots[selectedIndex]) {
+                console.log('No valid time slot selected');
+                return;
+            }
+            
+            const slot = availableTimeSlots[selectedIndex];
+            document.getElementById('startTime').value = slot.startTime.substring(0, 5);
+            document.getElementById('endTime').value = slot.endTime.substring(0, 5);
+            
+            console.log('Set time values from slot:', {
+                start: document.getElementById('startTime').value,
+                end: document.getElementById('endTime').value
+            });
+        }
+
+        async function createVenue() {
+            const venueData = {
+                venueName: document.getElementById('venueName').value,
+                location: document.getElementById('location').value,
+                capacity: document.getElementById('capacity').value,
+                status: document.getElementById('status').value
+            };
+
+            if (!venueData.venueName || !venueData.location || !venueData.capacity) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/venues', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(venueData)
+                });
+
+                if (response.ok) {
+                    alert('Venue added successfully!');
+                    document.getElementById('createVenueModal').querySelector('.btn-close').click();
+                    document.getElementById('createVenueForm').reset();
+                    loadVenues();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Failed to add venue');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding the venue');
+            }
+        }
+
+        async function scheduleVenue() {
+            const venueId = document.getElementById('scheduleVenueId').value;
+            const scheduleDate = document.getElementById('scheduleDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const eventRoundId = document.getElementById('eventRound').value;
+            
+            console.log('Scheduling venue with values:', {
+                venueId,
+                scheduleDate,
+                startTime,
+                endTime,
+                eventRoundId
+            });
+            
+            // Field validation
+            if (!scheduleDate) {
+                alert('Please select a date');
+                return;
+            }
+            
+            if (!startTime) {
+                alert('Please select a start time');
+                return;
+            }
+            
+            if (!endTime) {
+                alert('Please select an end time');
+                return;
+            }
+            
+            if (!eventRoundId) {
+                alert('Please select an event round');
+                return;
+            }
+            
+            // Date validation - check if date is in the past
+            const selectedDate = new Date(scheduleDate);
+            selectedDate.setHours(0, 0, 0, 0); // Reset time to beginning of day
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to beginning of day
+            
+            if (selectedDate < today) {
+                alert('Cannot book venues for past dates. Please select a current or future date.');
+                return;
+            }
+            
+            // Compare the times using string comparison for consistency
+            if (startTime >= endTime) {
+                alert('End time must be after start time');
+                return;
+            }
+            
+            const scheduleData = {
+                scheduleDate,
+                startTime,
+                endTime,
+                eventRoundId
+            };
+            
+            try {
+                const response = await fetch(`/api/venues/${venueId}/schedule`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(scheduleData)
+                });
+                
+                // Parse response
+                let data;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    console.error('Error parsing response:', error);
+                }
+                
+                if (response.ok) {
+                    alert('Venue scheduled successfully!');
+                    document.getElementById('scheduleVenueModal').querySelector('.btn-close').click();
+                    document.getElementById('scheduleVenueForm').reset();
+                    loadVenues();
+                } else {
+                    alert(data?.message || 'Unable to schedule venue. Please verify your information.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while connecting to the server. Please try again later.');
+            }
+        }
+
+        async function deleteSchedule(scheduleId) {
+            if (!confirm('Are you sure you want to delete this booking?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/venue-schedules/${scheduleId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Booking deleted successfully!');
+                    
+                    // Get the venue ID from the current schedule row data attribute
+                    // Using closest to find the parent row and get the venue ID
+                    const venueId = document.querySelector(`[data-schedule-id="${scheduleId}"]`).dataset.venueId;
+                    
+                    // Close the current modal
+                    document.getElementById('viewSchedulesModal').querySelector('.btn-close').click();
+                    
+                    // Check if we have a valid venue ID before trying to reopen the modal
+                    if (venueId) {
+                        // Store the venue ID for future operations
+                        document.getElementById('scheduleVenueId').value = venueId;
+                        // Only try to reopen the schedules modal if we have a venue ID
+                        openViewSchedulesModal(venueId);
+                    }
+                    
+                    // Always refresh the venues list
+                    loadVenues();
+                } else {
+                    // Try to get a detailed error message first
+                    try {
+                        const error = await response.json();
+                        alert(error.message || 'Failed to delete booking');
+                    } catch {
+                        // If response is not JSON, fallback to general error
+                        alert('Failed to delete booking');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the booking');
+            }
+        }
+
+        async function deleteVenue(venueId) {
+            if (!confirm('Are you sure you want to delete this venue?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/venues/${venueId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Venue deleted successfully!');
+                    loadVenues();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Failed to delete venue');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the venue');
+            }
+        }
+
+        // Load venues and event rounds when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadVenues();
+            loadEventRounds();
+        });
+    </script>
+</body>
+</html> 

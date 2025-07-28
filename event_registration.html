@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/events.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accommodation.html">Accommodation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 id="eventTitle">Event Registration</h2>
+                <div id="eventDetails" class="mb-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading event details...</p>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Registration Form</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="registrationForm">
+                            <div class="mb-3">
+                                <label class="form-label">Registration Type</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="registrationType" id="individual" value="individual" checked>
+                                    <label class="form-check-label" for="individual">
+                                        Individual Registration
+                                    </label>
+                                </div>
+                                <div class="form-check" id="teamOptionContainer">
+                                    <input class="form-check-input" type="radio" name="registrationType" id="team" value="team">
+                                    <label class="form-check-label" for="team">
+                                        Team Registration
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="teamDetailsSection" class="d-none">
+                                <div class="mb-3">
+                                    <label for="teamName" class="form-label">Team Name</label>
+                                    <input type="text" class="form-control" id="teamName">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Team Members</label>
+                                    <p class="form-text">Enter the email addresses of registered participants (not including yourself)</p>
+                                    
+                                    <div id="teamMembersContainer">
+                                        <div class="input-group mb-2">
+                                            <input type="email" class="form-control team-member" placeholder="team.member@example.com">
+                                            <button type="button" class="btn btn-outline-danger remove-member" disabled>
+                                                <i class="bi bi-dash-circle"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addMemberBtn">
+                                        <i class="bi bi-plus-circle"></i> Add Team Member
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <hr>
+                            
+                            <div class="mb-3">
+                                <h5>Payment Information</h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="online" value="Online" checked>
+                                    <label class="form-check-label" for="online">
+                                        Online Payment
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="manual" value="Manual">
+                                    <label class="form-check-label" for="manual">
+                                        Manual Payment (Cash/Bank Transfer)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="cardDetailsSection">
+                                <div class="mb-3">
+                                    <label for="cardNumber" class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456">
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cardExpiry" class="form-label">Expiry Date</label>
+                                        <input type="text" class="form-control" id="cardExpiry" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cardCVC" class="form-label">CVC</label>
+                                        <input type="text" class="form-control" id="cardCVC" placeholder="123">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Payment Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="amount" readonly>
+                                </div>
+                                <div class="form-text">Registration fee for this event</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Complete Registration</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Important Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Registration Notes</h6>
+                        <ul>
+                            <li>Once registered, your spot is confirmed only after payment is processed.</li>
+                            <li>For team events, all team members must have registered accounts.</li>
+                            <li>You will receive a confirmation email after successful registration.</li>
+                            <li>Cancellations are subject to the event's cancellation policy.</li>
+                        </ul>
+                        
+                        <h6>Payment Options</h6>
+                        <p>We accept the following payment methods:</p>
+                        <ul>
+                            <li>Credit/Debit Cards</li>
+                            <li>Cash (at designated counters)</li>
+                            <li>Bank Transfer</li>
+                        </ul>
+                        
+                        <div id="eventRules" class="mt-3">
+                            <h6>Event Rules</h6>
+                            <div id="rulesContent">
+                                <p>Loading event rules...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Registration Successful</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-center">Thank you for registering!</h4>
+                    <p>Your registration for the event has been successfully completed. You will receive a confirmation email shortly.</p>
+                    <div id="teamConfirmation" class="d-none">
+                        <p class="fw-bold">Team Registration Details:</p>
+                        <p>Team ID: <span id="teamIdDisplay"></span></p>
+                        <p>Team Name: <span id="teamNameDisplay"></span></p>
+                    </div>
+                    <p class="fw-bold">Registration ID: <span id="registrationIdDisplay"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="/events.html" class="btn btn-secondary">Back to Events</a>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get event ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id');
+        let eventDetails = null;
+        let maxTeamMembers = 0;
+        
+        // Elements
+        const eventTitle = document.getElementById('eventTitle');
+        const eventDetailsSection = document.getElementById('eventDetails');
+        const registrationForm = document.getElementById('registrationForm');
+        const teamOptionContainer = document.getElementById('teamOptionContainer');
+        const teamDetailsSection = document.getElementById('teamDetailsSection');
+        const teamMembersContainer = document.getElementById('teamMembersContainer');
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        const cardDetailsSection = document.getElementById('cardDetailsSection');
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        
+        // Load event details
+        async function loadEventDetails() {
+            if (!eventId) {
+                window.location.href = '/events.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/events/${eventId}/details`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch event details');
+                }
+                
+                eventDetails = await response.json();
+                
+                // Update UI with event details
+                eventTitle.textContent = `Registration: ${eventDetails.EventName}`;
+                
+                // Display event info
+                eventDetailsSection.innerHTML = `
+                    <div class="alert alert-info">
+                        <h5>${eventDetails.EventName}</h5>
+                        <p><strong>Date:</strong> ${new Date(eventDetails.EventDateTime).toLocaleString()}</p>
+                        <p><strong>Category:</strong> ${eventDetails.CategoryName}</p>
+                        <p><strong>Registration Fee:</strong> $${parseFloat(eventDetails.RegistrationFee).toFixed(2)}</p>
+                        <p><strong>Event Type:</strong> ${eventDetails.EventType}</p>
+                        <p><strong>Max Participants:</strong> ${eventDetails.MaxParticipants}</p>
+                    </div>
+                `;
+                
+                // Set amount field
+                document.getElementById('amount').value = parseFloat(eventDetails.RegistrationFee).toFixed(2);
+                
+                // Display event rules
+                const rulesContent = document.getElementById('rulesContent');
+                rulesContent.innerHTML = eventDetails.Rules ? eventDetails.Rules : 'No specific rules provided for this event.';
+                
+                // Handle event type (individual/team)
+                if (eventDetails.EventType === 'Individual') {
+                    // Hide team option for individual events
+                    teamOptionContainer.style.display = 'none';
+                    document.getElementById('individual').checked = true;
+                } else {
+                    // Set max team members
+                    maxTeamMembers = eventDetails.MaxParticipants - 1; // -1 for the current user
+                    
+                    // Enable team option for team events
+                    teamOptionContainer.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error loading event details:', error);
+                eventDetailsSection.innerHTML = `
+                    <div class="alert alert-danger">
+                        <p>Failed to load event details. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Handle registration type change
+        document.querySelectorAll('input[name="registrationType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'team') {
+                    teamDetailsSection.classList.remove('d-none');
+                } else {
+                    teamDetailsSection.classList.add('d-none');
+                }
+            });
+        });
+        
+        // Handle payment method change
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'Online') {
+                    cardDetailsSection.style.display = 'block';
+                } else {
+                    cardDetailsSection.style.display = 'none';
+                }
+            });
+        });
+        
+        // Add team member field
+        addMemberBtn.addEventListener('click', function() {
+            const currentMembers = document.querySelectorAll('.team-member').length;
+            
+            if (currentMembers < maxTeamMembers) {
+                const memberField = document.createElement('div');
+                memberField.className = 'input-group mb-2';
+                memberField.innerHTML = `
+                    <input type="email" class="form-control team-member" placeholder="team.member@example.com">
+                    <button type="button" class="btn btn-outline-danger remove-member">
+                        <i class="bi bi-dash-circle"></i>
+                    </button>
+                `;
+                
+                teamMembersContainer.appendChild(memberField);
+                
+                // Enable all remove buttons when there's more than one member
+                document.querySelectorAll('.remove-member').forEach(btn => {
+                    btn.disabled = false;
+                });
+            }
+            
+            // Disable add button if max reached
+            if (document.querySelectorAll('.team-member').length >= maxTeamMembers) {
+                addMemberBtn.disabled = true;
+            }
+        });
+        
+        // Remove team member field
+        teamMembersContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-member') || e.target.parentElement.classList.contains('remove-member')) {
+                const button = e.target.closest('.remove-member');
+                if (!button.disabled) {
+                    button.closest('.input-group').remove();
+                    
+                    // Re-enable add button
+                    addMemberBtn.disabled = false;
+                    
+                    // If only one member field left, disable its remove button
+                    if (document.querySelectorAll('.team-member').length === 1) {
+                        document.querySelector('.remove-member').disabled = true;
+                    }
+                }
+            }
+        });
+        
+        // Handle form submission
+        registrationForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validate form
+            const registrationType = document.querySelector('input[name="registrationType"]:checked').value;
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            
+            // Initialize teamName variable
+            let teamName = null;
+            
+            if (registrationType === 'team') {
+                teamName = document.getElementById('teamName').value.trim();
+                if (!teamName) {
+                    alert('Please enter a team name');
+                    return;
+                }
+                
+                // Get team members emails
+                const teamMemberInputs = document.querySelectorAll('.team-member');
+                let hasEmptyEmail = false;
+                
+                teamMemberInputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        hasEmptyEmail = true;
+                    }
+                });
+                
+                if (hasEmptyEmail) {
+                    alert('Please enter email addresses for all team members');
+                    return;
+                }
+            }
+            
+            if (paymentMethod === 'Online') {
+                const cardNumber = document.getElementById('cardNumber').value.trim();
+                const cardExpiry = document.getElementById('cardExpiry').value.trim();
+                const cardCVC = document.getElementById('cardCVC').value.trim();
+                
+                if (!cardNumber || !cardExpiry || !cardCVC) {
+                    alert('Please enter all card details');
+                    return;
+                }
+            }
+            
+            // Prepare registration data
+            const teamMembersList = [];
+            const teamMembers = document.querySelectorAll('.team-member');
+            teamMembers.forEach(input => {
+                if (input.value.trim()) {
+                    teamMembersList.push({
+                        email: input.value.trim()
+                    });
+                }
+            });
+            
+            const amount = document.getElementById('amount').value;
+            
+            const registrationData = {
+                eventId: eventId,
+                registrationType: registrationType,
+                teamName: teamName,
+                teamMembers: teamMembersList,
+                paymentMethod: paymentMethod,
+                amount: amount
+            };
+            
+            if (paymentMethod === 'Online') {
+                registrationData.cardNumber = document.getElementById('cardNumber').value.trim();
+            }
+            
+            try {
+                // Submit registration
+                const response = await fetch(`/api/events/${eventId}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registrationData)
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Registration failed');
+                }
+                
+                const result = await response.json();
+                
+                // Show success modal
+                document.getElementById('registrationIdDisplay').textContent = result.registrationId;
+                
+                if (result.teamId) {
+                    document.getElementById('teamIdDisplay').textContent = result.teamId;
+                    document.getElementById('teamNameDisplay').textContent = registrationData.teamName;
+                    document.getElementById('teamConfirmation').classList.remove('d-none');
+                } else {
+                    document.getElementById('teamConfirmation').classList.add('d-none');
+                }
+                
+                successModal.show();
+                
+                // Reset form
+                registrationForm.reset();
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert(error.message || 'Failed to complete registration. Please try again.');
+            }
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadEventDetails();
+        });
+    </script>
+</body>
+</html> 

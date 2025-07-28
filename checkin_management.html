@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-in Management - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/event_management.html">Events</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                            Management
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/accommodation_management.html">Accommodation</a></li>
+                            <li><a class="dropdown-item" href="/admin/rooms.html">Rooms</a></li>
+                            <li><a class="dropdown-item active" href="/checkin_management.html">Check-ins</a></li>
+                            <li><a class="dropdown-item" href="/admin/judge_assignment.html">Judge Assignment</a></li>
+                            <li><a class="dropdown-item" href="/admin/evaluation.html">Evaluations</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/admin/user_management.html">User Management</a></li>
+                            <li><a class="dropdown-item" href="/admin/role_requests.html">Role Requests</a></li>
+                            <li><a class="dropdown-item" href="/sponsor_management.html">Sponsors</a></li>
+                            <li><a class="dropdown-item" href="/admin/sponsorship_packages.html">Sponsorship Packages</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutButton">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Accommodation Check-ins Section -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Accommodation Check-ins</h5>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="showAllCheckins" checked>
+                    <label class="form-check-label text-white" for="showAllCheckins">Show All</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchParticipant" placeholder="Search participants...">
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#checkinModal">
+                            <i class="bi bi-plus-circle"></i> New Check-in
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Check-in ID</th>
+                                <th>Participant</th>
+                                <th>Room Number</th>
+                                <th>Scheduled Check-in</th>
+                                <th>Scheduled Check-out</th>
+                                <th>Actual Check-in</th>
+                                <th>Actual Check-out</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checkinTableBody">
+                            <!-- Check-ins will be populated here -->
+                            <tr>
+                                <td colspan="9" class="text-center">Loading check-ins...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-in Modal -->
+    <div class="modal fade" id="checkinModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Participant Check-in</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="checkinForm">
+                        <div class="mb-3">
+                            <label for="allocatedRoomsSelect" class="form-label">Select Allocated Room</label>
+                            <select class="form-select" id="allocatedRoomsSelect" required>
+                                <option value="">Select allocated room</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                            <div class="form-text">This lists all participants with allocated rooms who haven't checked in yet</div>
+                        </div>
+                        
+                        <div id="selectedAllocationDetails" class="alert alert-info d-none">
+                            <!-- Will be populated when a room is selected -->
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="actualCheckInDate" class="form-label">Actual Check-in Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="actualCheckInDate" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="checkinNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="checkinNotes" rows="3" placeholder="Any special notes or comments for this check-in"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="processCheckinBtn">Process Check-in</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-out Modal -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Participant Check-out</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="checkoutForm">
+                        <input type="hidden" id="checkoutId">
+                        
+                        <div id="checkoutDetails" class="alert alert-info mb-3">
+                            <!-- Will be populated with details -->
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="actualCheckOutDate" class="form-label">Actual Check-out Date & Time</label>
+                            <input type="datetime-local" class="form-control" id="actualCheckOutDate" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="checkoutNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="checkoutNotes" rows="3" placeholder="Any special notes or comments for this check-out"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="processCheckoutBtn">Process Check-out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allocations = [];
+        let checkins = [];
+        const checkinModal = new bootstrap.Modal(document.getElementById('checkinModal'));
+        const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+        
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default date time for check-in to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('actualCheckInDate').value = now.toISOString().slice(0, 16);
+            document.getElementById('actualCheckOutDate').value = now.toISOString().slice(0, 16);
+            
+            // Load available allocations and check-ins
+            loadAllocations();
+            loadCheckins();
+            
+            // Set up event handlers
+            document.getElementById('processCheckinBtn').addEventListener('click', processCheckin);
+            document.getElementById('processCheckoutBtn').addEventListener('click', processCheckout);
+            document.getElementById('showAllCheckins').addEventListener('change', toggleCheckinDisplay);
+            document.getElementById('searchParticipant').addEventListener('input', filterCheckins);
+            document.getElementById('allocatedRoomsSelect').addEventListener('change', showAllocationDetails);
+            
+            // Add logout functionality
+            document.getElementById('logoutButton').addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    const response = await fetch('/logout', { method: 'POST' });
+                    if (response.ok) {
+                        window.location.href = '/login.html';
+                    } else {
+                        alert('Logout failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Logout failed');
+                }
+            });
+        });
+        
+        // Load allocated rooms that haven't been checked in yet
+        async function loadAllocations() {
+            try {
+                const response = await fetch('/api/room-allocations/available');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch available allocations');
+                }
+                
+                const result = await response.json();
+                allocations = result.data || [];
+                
+                const select = document.getElementById('allocatedRoomsSelect');
+                select.innerHTML = '<option value="">Select allocated room</option>';
+                
+                if (allocations.length === 0) {
+                    select.innerHTML += '<option value="" disabled>No available allocations found</option>';
+                    return;
+                }
+                
+                allocations.forEach(allocation => {
+                    const option = document.createElement('option');
+                    option.value = allocation.AllocationID;
+                    option.textContent = `${allocation.UserName} - Room ${allocation.RoomNumber} (${new Date(allocation.CheckInDate).toLocaleDateString()} to ${new Date(allocation.CheckOutDate).toLocaleDateString()})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading allocations:', error);
+                const select = document.getElementById('allocatedRoomsSelect');
+                select.innerHTML = '<option value="">Error loading allocations</option>';
+            }
+        }
+        
+        // Load all check-ins
+        async function loadCheckins() {
+            try {
+                const response = await fetch('/api/checkins');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch check-ins');
+                }
+                const checkins = await response.json();
+                const tbody = document.getElementById('checkinTableBody');
+                
+                if (checkins.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">No check-ins found</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                checkins.forEach(checkin => {
+                    const row = document.createElement('tr');
+                    
+                    // Determine if this is a self check-in by the participant
+                    const isSelfCheckin = checkin.Notes && (
+                        checkin.Notes.includes('Self check-in') || 
+                        checkin.Notes.includes('requested by participant')
+                    );
+                    
+                    // Add a badge for self check-ins
+                    const selfBadge = isSelfCheckin ? 
+                        '<span class="badge bg-info ms-2">Self Check-in</span>' : 
+                        '';
+                    
+                    row.innerHTML = `
+                        <td>${checkin.CheckinID}</td>
+                        <td>${checkin.ParticipantName}${selfBadge}</td>
+                        <td>${checkin.EventName}</td>
+                        <td>${checkin.CheckinTime ? new Date(checkin.CheckinTime).toLocaleString() : 'Not checked in yet'}</td>
+                        <td>${checkin.CheckoutTime ? new Date(checkin.CheckoutTime).toLocaleString() : '-'}</td>
+                        <td><span class="badge ${getStatusBadgeClass(checkin.Status)}">${checkin.Status}</span></td>
+                        <td>
+                            ${checkin.Status === 'Reserved' ? 
+                                `<button class="btn btn-sm btn-success me-2" onclick="processAdminCheckin(${checkin.CheckinID})">
+                                    <i class="bi bi-box-arrow-in-right"></i> Check-in
+                                </button>` : 
+                                ''
+                            }
+                            ${checkin.Status === 'Checked In' ? 
+                                `<button class="btn btn-sm btn-warning" onclick="processCheckout(${checkin.CheckinID})">
+                                    <i class="bi bi-box-arrow-right"></i> Check-out
+                                </button>` : 
+                                checkin.Status === 'Checked Out' ? 
+                                '<span class="text-muted">Completed</span>' : 
+                                ''
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to load check-ins');
+            }
+        }
+        
+        // Get badge class for status
+        function getStatusBadgeClass(status) {
+            switch(status) {
+                case 'Reserved': return 'bg-warning text-dark';
+                case 'Checked In': return 'bg-success';
+                case 'Checked Out': return 'bg-info';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        // Show allocation details when selected in the dropdown
+        function showAllocationDetails() {
+            const allocationId = document.getElementById('allocatedRoomsSelect').value;
+            const details = document.getElementById('selectedAllocationDetails');
+            
+            if (!allocationId) {
+                details.classList.add('d-none');
+                return;
+            }
+            
+            const allocation = allocations.find(a => a.AllocationID.toString() === allocationId);
+            if (!allocation) {
+                details.classList.add('d-none');
+                return;
+            }
+            
+            details.classList.remove('d-none');
+            details.innerHTML = `
+                <h5>Allocation Details</h5>
+                <p><strong>Participant:</strong> ${allocation.UserName}</p>
+                <p><strong>Room:</strong> ${allocation.RoomNumber} (Capacity: ${allocation.Capacity})</p>
+                <p><strong>Scheduled Stay:</strong> ${new Date(allocation.CheckInDate).toLocaleDateString()} to ${new Date(allocation.CheckOutDate).toLocaleDateString()}</p>
+                <p><strong>Price:</strong> $${allocation.Price.toFixed(2)} per night</p>
+            `;
+        }
+        
+        // Toggle display of all check-ins vs active only
+        function toggleCheckinDisplay() {
+            loadCheckins();
+        }
+        
+        // Filter check-ins based on search term
+        function filterCheckins() {
+            loadCheckins();
+        }
+        
+        // Open check-in modal for an allocation
+        window.openCheckinModal = function(checkinId) {
+            // If a specific check-in ID is provided, find it and populate the form
+            if (checkinId) {
+                const checkin = checkins.find(c => c.CheckinID === checkinId);
+                if (checkin) {
+                    document.getElementById('selectedAllocationDetails').classList.remove('d-none');
+                    document.getElementById('selectedAllocationDetails').innerHTML = `
+                        <h5>Check-in Details</h5>
+                        <p><strong>Participant:</strong> ${checkin.ParticipantName}</p>
+                        <p><strong>Room:</strong> ${checkin.RoomNumber}</p>
+                        <p><strong>Scheduled Stay:</strong> ${new Date(checkin.ScheduledCheckinDate).toLocaleDateString()} to ${new Date(checkin.ScheduledCheckoutDate).toLocaleDateString()}</p>
+                    `;
+                    
+                    // Store the check-in ID in a data attribute for the process button
+                    document.getElementById('processCheckinBtn').dataset.checkinId = checkinId;
+                }
+            }
+            
+            checkinModal.show();
+        }
+        
+        // Open check-out modal
+        window.openCheckoutModal = function(checkinId) {
+            const checkin = checkins.find(c => c.CheckinID === checkinId);
+            if (!checkin) return;
+            
+            document.getElementById('checkoutId').value = checkinId;
+            document.getElementById('checkoutDetails').innerHTML = `
+                <h5>Check-out Details</h5>
+                <p><strong>Participant:</strong> ${checkin.ParticipantName}</p>
+                <p><strong>Room:</strong> ${checkin.RoomNumber}</p>
+                <p><strong>Check-in Date:</strong> ${new Date(checkin.ActualCheckinDate).toLocaleString()}</p>
+                <p><strong>Scheduled Check-out:</strong> ${new Date(checkin.ScheduledCheckoutDate).toLocaleDateString()}</p>
+            `;
+            
+            checkoutModal.show();
+        }
+        
+        // Process new check-in
+        async function processCheckin() {
+            const form = document.getElementById('checkinForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Check if it's a new check-in or updating an existing one
+            const checkinId = document.getElementById('processCheckinBtn').dataset.checkinId;
+            const allocationId = document.getElementById('allocatedRoomsSelect').value;
+            
+            if (!checkinId && !allocationId) {
+                alert('Please select an allocation or check-in to process');
+                return;
+            }
+            
+            const actualCheckInDate = document.getElementById('actualCheckInDate').value;
+            const notes = document.getElementById('checkinNotes').value;
+            
+            let endpoint, method, requestData;
+            
+            if (checkinId) {
+                // Update existing check-in
+                endpoint = `/api/checkins/${checkinId}/check-in`;
+                method = 'PUT';
+                requestData = { actualCheckInDate, notes };
+            } else {
+                // Create new check-in
+                endpoint = '/api/checkins';
+                method = 'POST';
+                requestData = { allocationId, actualCheckInDate, notes };
+            }
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    checkinModal.hide();
+                    alert(result.message || 'Check-in processed successfully');
+                    
+                    // Reset form and reload data
+                    form.reset();
+                    document.getElementById('selectedAllocationDetails').classList.add('d-none');
+                    delete document.getElementById('processCheckinBtn').dataset.checkinId;
+                    
+                    await Promise.all([loadAllocations(), loadCheckins()]);
+                } else {
+                    alert(result.message || 'Failed to process check-in');
+                }
+            } catch (error) {
+                console.error('Error processing check-in:', error);
+                alert('An error occurred while processing check-in');
+            }
+        }
+        
+        // Process check-out
+        async function processCheckout() {
+            const form = document.getElementById('checkoutForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const checkinId = document.getElementById('checkoutId').value;
+            const actualCheckOutDate = document.getElementById('actualCheckOutDate').value;
+            const notes = document.getElementById('checkoutNotes').value;
+            
+            try {
+                const response = await fetch(`/api/checkins/${checkinId}/check-out`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ actualCheckOutDate, notes })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    checkoutModal.hide();
+                    alert(result.message || 'Check-out processed successfully');
+                    
+                    // Reset form and reload data
+                    form.reset();
+                    
+                    await loadCheckins();
+                } else {
+                    alert(result.message || 'Failed to process check-out');
+                }
+            } catch (error) {
+                console.error('Error processing check-out:', error);
+                alert('An error occurred while processing check-out');
+            }
+        }
+    </script>
+</body>
+</html> 

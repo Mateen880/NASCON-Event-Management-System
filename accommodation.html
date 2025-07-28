@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accommodation - NASCON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .accommodation-card {
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .accommodation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/homepage.html">NASCON</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/homepage.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/events.html">Events</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/accommodation.html">Accommodation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user_profile.html">Profile</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <h2 class="mb-4">Accommodation Bookings</h2>
+                <div id="bookingsContainer">
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> Loading your bookings...
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Request Accommodation</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="accommodationRequestForm">
+                            <div class="mb-3">
+                                <label for="eventRegistration" class="form-label">Event Registration</label>
+                                <select class="form-select" id="eventRegistration" required>
+                                    <option value="">Select an event registration</option>
+                                    <!-- Will be populated dynamically -->
+                                </select>
+                                <div class="form-text">Select the event you're requesting accommodation for</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="numberOfPeople" class="form-label">Number of People</label>
+                                <input type="number" class="form-control" id="numberOfPeople" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="budget" class="form-label">Budget (per night)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="budget" min="0" step="1" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Submit Request</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Details Modal -->
+    <div class="modal fade" id="bookingDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Accommodation Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="bookingDetailsContent">
+                    <!-- Content will be populated dynamically -->
+                </div>
+                <div class="modal-footer" id="bookingModalFooter">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger d-none" id="cancelBookingBtn">Cancel Booking</button>
+                    <button type="button" class="btn btn-success d-none" id="checkInBtn">Check In</button>
+                    <button type="button" class="btn btn-warning d-none" id="checkOutBtn">Check Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentBookings = [];
+        let currentRegistrations = [];
+        const bookingDetailsModal = new bootstrap.Modal(document.getElementById('bookingDetailsModal'));
+        
+        // Load participant's event registrations for the dropdown
+        async function loadRegistrations() {
+            try {
+                const response = await fetch('/api/registrations');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch registrations');
+                }
+                
+                const result = await response.json();
+                // Handle the direct response format (array of registrations)
+                currentRegistrations = Array.isArray(result) ? result : [];
+                
+                const select = document.getElementById('eventRegistration');
+                
+                // Clear existing options except the placeholder
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+                
+                // Add options for each registration without accommodation
+                currentRegistrations.forEach(reg => {
+                    if (!reg.hasAccommodation) {
+                        const option = document.createElement('option');
+                        option.value = reg.RegistrationID;
+                        option.textContent = `${reg.EventName} - ${new Date(reg.EventDateTime).toLocaleDateString()}`;
+                        select.appendChild(option);
+                    }
+                });
+                
+                // Show message if no available registrations
+                if (select.options.length === 1) {
+                    const option = document.createElement('option');
+                    option.disabled = true;
+                    option.textContent = 'No available event registrations';
+                    select.appendChild(option);
+                }
+            } catch (error) {
+                console.error('Error loading registrations:', error);
+                alert('Failed to load event registrations');
+            }
+        }
+        
+        // Load participant's accommodation bookings
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/participant/accommodations');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch accommodations');
+                }
+                
+                const result = await response.json();
+                // Handle the direct response format (array of bookings)
+                currentBookings = Array.isArray(result) ? result : [];
+                
+                const container = document.getElementById('bookingsContainer');
+                
+                if (currentBookings.length === 0) {
+                    container.innerHTML = `
+                        <div class="alert alert-info" role="alert">
+                            <i class="bi bi-info-circle"></i> You don't have any accommodation bookings yet.
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display bookings as cards
+                container.innerHTML = `<div class="row row-cols-1 row-cols-md-2 g-4" id="bookingsGrid"></div>`;
+                const grid = document.getElementById('bookingsGrid');
+                
+                currentBookings.forEach(booking => {
+                    try {
+                        const statusClass = getStatusClass(booking.AccommodationStatus);
+                        const card = document.createElement('div');
+                        card.className = 'col';
+                        card.innerHTML = `
+                            <div class="card accommodation-card position-relative">
+                                <div class="status-badge badge ${statusClass}">${booking.AccommodationStatus || 'Unknown'}</div>
+                                <div class="card-body">
+                                    <h5 class="card-title">${booking.EventName || 'Event'}</h5>
+                                    <p class="card-text">
+                                        <strong>People:</strong> ${booking.NumberOfPeople || '0'}<br>
+                                        <strong>Budget:</strong> $${typeof booking.Budget === 'number' ? booking.Budget.toFixed(2) : '0.00'}
+                                    </p>
+                                    <button class="btn btn-sm btn-primary" onclick="showBookingDetails(${booking.AccommodationID})">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    } catch (cardError) {
+                        console.error("Error creating booking card:", booking, cardError);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('bookingsContainer').innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> Failed to load your accommodation bookings.
+                    </div>
+                `;
+            }
+        }
+        
+        // Helper to get appropriate badge class based on status
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Requested': return 'bg-warning text-dark';
+                case 'Allocated': return 'bg-success';
+                case 'Cancelled': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        // Helper to get check-in status badge class
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'Reserved': return 'bg-warning text-dark';
+                case 'Checked In': return 'bg-success';
+                case 'Checked Out': return 'bg-info';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        // Show booking details in modal
+        window.showBookingDetails = function(accommodationId) {
+            try {
+                const booking = currentBookings.find(b => b.AccommodationID === accommodationId);
+                if (!booking) {
+                    alert("Booking details not found");
+                    return;
+                }
+                
+                const detailsContent = document.getElementById('bookingDetailsContent');
+                let roomDetails = '';
+                let checkInStatus = '';
+                
+                // Reset footer buttons
+                document.getElementById('cancelBookingBtn').classList.add('d-none');
+                document.getElementById('checkInBtn').classList.add('d-none');
+                document.getElementById('checkOutBtn').classList.add('d-none');
+                
+                if (booking.AccommodationStatus === 'Allocated' && booking.RoomDetails) {
+                    // Add room details
+                    roomDetails = `
+                        <div class="alert alert-success">
+                            <h5><i class="bi bi-house-check"></i> Room Allocated</h5>
+                            <p>
+                                <strong>Room Number:</strong> ${booking.RoomDetails.RoomNumber || 'Not assigned yet'}<br>
+                                <strong>Check-in:</strong> ${booking.RoomDetails.CheckInDate ? new Date(booking.RoomDetails.CheckInDate).toLocaleDateString() : 'Not set'}<br>
+                                <strong>Check-out:</strong> ${booking.RoomDetails.CheckOutDate ? new Date(booking.RoomDetails.CheckOutDate).toLocaleDateString() : 'Not set'}
+                            </p>
+                        </div>
+                    `;
+                    
+                    // Check if there is a check-in record associated with this allocation
+                    if (booking.CheckinStatus) {
+                        const statusClass = getStatusBadgeClass(booking.CheckinStatus);
+                        
+                        checkInStatus = `
+                            <div class="alert ${statusClass === 'bg-success' ? 'alert-success' : 'alert-info'}">
+                                <h5><i class="${booking.CheckinStatus === 'Checked In' ? 'bi bi-check-circle' : 'bi bi-info-circle'}"></i> Check-in Status</h5>
+                                <p>
+                                    <strong>Status:</strong> <span class="badge ${statusClass}">${booking.CheckinStatus}</span><br>
+                                    ${booking.ActualCheckinDate ? `<strong>Checked in:</strong> ${new Date(booking.ActualCheckinDate).toLocaleString()}<br>` : ''}
+                                    ${booking.ActualCheckoutDate ? `<strong>Checked out:</strong> ${new Date(booking.ActualCheckoutDate).toLocaleString()}<br>` : ''}
+                                </p>
+                            </div>
+                        `;
+                        
+                        // Show check-in/check-out buttons based on status
+                        if (booking.CheckinStatus === 'Reserved') {
+                            document.getElementById('checkInBtn').classList.remove('d-none');
+                            document.getElementById('checkInBtn').onclick = () => processCheckin(booking.CheckinID);
+                        } else if (booking.CheckinStatus === 'Checked In') {
+                            document.getElementById('checkOutBtn').classList.remove('d-none');
+                            document.getElementById('checkOutBtn').onclick = () => processCheckout(booking.CheckinID);
+                        }
+                    } else {
+                        // No check-in record exists yet, but room is allocated
+                        checkInStatus = `
+                            <div class="alert alert-warning">
+                                <h5><i class="bi bi-exclamation-triangle"></i> Not Checked In</h5>
+                                <p>You have not checked in yet. Please check in upon arrival.</p>
+                            </div>
+                        `;
+                        
+                        // Show a "Check In" button (not "Request Check-in") since it's now direct check-in
+                        const today = new Date();
+                        const checkInDate = booking.RoomDetails.CheckInDate ? new Date(booking.RoomDetails.CheckInDate) : null;
+                        
+                        // Only show the check-in button if we're within the valid date range
+                        if (checkInDate && today >= checkInDate) {
+                            document.getElementById('checkInBtn').classList.remove('d-none');
+                            document.getElementById('checkInBtn').textContent = 'Check In';
+                            document.getElementById('checkInBtn').onclick = () => requestCheckin(booking.AllocationID);
+                        }
+                    }
+                }
+                
+                // Show cancel button for requested accommodations
+                if (booking.AccommodationStatus === 'Requested') {
+                    document.getElementById('cancelBookingBtn').classList.remove('d-none');
+                    document.getElementById('cancelBookingBtn').onclick = () => cancelBooking(booking.AccommodationID);
+                }
+                
+                detailsContent.innerHTML = `
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Accommodation Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Event:</strong> ${booking.EventName || 'N/A'}</p>
+                                    <p><strong>Status:</strong> <span class="badge ${getStatusClass(booking.AccommodationStatus)}">${booking.AccommodationStatus || 'Unknown'}</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Number of People:</strong> ${booking.NumberOfPeople || '0'}</p>
+                                    <p><strong>Budget:</strong> $${typeof booking.Budget === 'number' ? booking.Budget.toFixed(2) : '0.00'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${roomDetails}
+                    ${checkInStatus}
+                `;
+                
+                bookingDetailsModal.show();
+            } catch (error) {
+                console.error("Error displaying booking details:", error);
+                alert("Failed to display booking details. Please try again.");
+            }
+        };
+        
+        // Cancel accommodation booking
+        async function cancelBooking(accommodationId) {
+            if (!confirm('Are you sure you want to cancel this accommodation booking?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/participant/accommodations/${accommodationId}/cancel`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Accommodation booking cancelled successfully');
+                    bookingDetailsModal.hide();
+                    loadBookings();
+                    loadRegistrations();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Failed to cancel booking');
+                }
+            } catch (error) {
+                console.error('Error cancelling booking:', error);
+                alert('An error occurred while cancelling the booking');
+            }
+        }
+        
+        // Self check-in for participant
+        async function processCheckin(checkinId) {
+            if (!confirm('Are you sure you want to check in now?')) {
+                return;
+            }
+            
+            try {
+                const currentDate = new Date();
+                // Format the date in MySQL compatible format (YYYY-MM-DD HH:MM:SS)
+                const formattedDate = currentDate.toISOString().slice(0, 19).replace('T', ' ');
+                
+                const response = await fetch(`/api/participant/checkins/${checkinId}/check-in`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ actualCheckInDate: formattedDate })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message || 'Check-in successful!');
+                    bookingDetailsModal.hide();
+                    loadBookings();
+                } else {
+                    alert(result.message || 'Failed to check in');
+                }
+            } catch (error) {
+                console.error('Error during check-in:', error);
+                alert('An error occurred during check-in');
+            }
+        }
+        
+        // Self check-out for participant
+        async function processCheckout(checkinId) {
+            if (!confirm('Are you sure you want to check out now?')) {
+                return;
+            }
+            
+            try {
+                const currentDate = new Date();
+                // Format the date in MySQL compatible format (YYYY-MM-DD HH:MM:SS)
+                const formattedDate = currentDate.toISOString().slice(0, 19).replace('T', ' ');
+                
+                const response = await fetch(`/api/participant/checkins/${checkinId}/check-out`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ actualCheckOutDate: formattedDate })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message || 'Check-out successful!');
+                    bookingDetailsModal.hide();
+                    loadBookings();
+                } else {
+                    alert(result.message || 'Failed to check out');
+                }
+            } catch (error) {
+                console.error('Error during check-out:', error);
+                alert('An error occurred during check-out');
+            }
+        }
+
+        // Request a new check-in for an allocation that doesn't have a check-in record yet
+        async function requestCheckin(allocationId) {
+            if (!confirm('Are you sure you want to check in for this accommodation?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/participant/checkins', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        allocationId: allocationId,
+                        notes: 'Self check-in by participant'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message || 'Check-in completed successfully!');
+                    bookingDetailsModal.hide();
+                    loadBookings();
+                } else {
+                    alert(result.message || 'Failed to check in');
+                }
+            } catch (error) {
+                console.error('Error during check-in:', error);
+                alert('An error occurred during check-in');
+            }
+        }
+        
+        // Submit accommodation request
+        document.getElementById('accommodationRequestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const requestData = {
+                registrationId: document.getElementById('eventRegistration').value,
+                numberOfPeople: parseInt(document.getElementById('numberOfPeople').value),
+                budget: parseFloat(document.getElementById('budget').value)
+            };
+            
+            try {
+                const response = await fetch('/api/participant/accommodations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (response.ok) {
+                    alert('Accommodation request submitted successfully!');
+                    document.getElementById('accommodationRequestForm').reset();
+                    loadBookings();
+                    loadRegistrations();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || 'Failed to submit accommodation request');
+                }
+            } catch (error) {
+                console.error('Error submitting request:', error);
+                alert('Failed to submit accommodation request');
+            }
+        });
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRegistrations();
+            loadBookings();
+        });
+    </script>
+</body>
+</html> 
